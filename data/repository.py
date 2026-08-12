@@ -2577,6 +2577,20 @@ def excluir_ebd_escala(slug, id_escala):
         conn.execute("DELETE FROM ebd_escala_professores WHERE id_escala=?", (int(id_escala),))
 
 
+def excluir_ebd_escala_lote(slug, ids_escala):
+    ids = [int(i) for i in ids_escala]
+    if not ids:
+        return
+    db = _tenant_db(slug)
+    with _conn(db) as conn:
+        _garantir_tabelas_ebd(conn)
+        placeholders = ",".join("?" for _ in ids)
+        conn.execute(
+            f"DELETE FROM ebd_escala_professores WHERE id_escala IN ({placeholders})",
+            ids,
+        )
+
+
 def listar_ebd_professores_classe(slug, id_classe=None, funcao=None, incluir_inativos=False):
     db = _tenant_db(slug)
     if not db.exists():

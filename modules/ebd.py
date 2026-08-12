@@ -17,6 +17,7 @@ from data.repository import (
     encerrar_ebd_matricula,
     excluir_ebd_classe,
     excluir_ebd_escala,
+    excluir_ebd_escala_lote,
     inativar_ebd_secretario,
     listar_ebd_aulas,
     listar_ebd_classes,
@@ -2178,18 +2179,34 @@ def _render_escala_editar(slug, escala, op_classes, opcoes_item):
                     st.error(str(exc))
 
 
-def _render_escala_excluir(slug, opcoes_item):
-    excluir_label = st.selectbox(
-        "Selecione o item para excluir",
-        ["Selecione"] + list(opcoes_item.keys()),
-        key="escala_excluir_select",
+def _render_escala_excluir(slug, escala, opcoes_item, periodo_texto):
+    modo_excluir = st.radio(
+        "Como deseja excluir?",
+        ["Um item especifico", "Todo o periodo filtrado"],
+        key="escala_excluir_modo",
     )
-    if excluir_label == "Selecione":
-        return
-    if confirmar_exclusao(f"excluir_escala_{excluir_label}", "Excluir escala selecionada"):
-        excluir_ebd_escala(slug, opcoes_item[excluir_label])
-        st.success("Escala excluida.")
-        st.rerun()
+    if modo_excluir == "Um item especifico":
+        excluir_label = st.selectbox(
+            "Selecione o item para excluir",
+            ["Selecione"] + list(opcoes_item.keys()),
+            key="escala_excluir_select",
+        )
+        if excluir_label == "Selecione":
+            return
+        if confirmar_exclusao(f"excluir_escala_{excluir_label}", "Excluir escala selecionada"):
+            excluir_ebd_escala(slug, opcoes_item[excluir_label])
+            st.success("Escala excluida.")
+            st.rerun()
+    else:
+        qtd = len(escala)
+        if qtd == 0:
+            st.info("Nenhuma escala no periodo/filtro atual.")
+            return
+        st.warning(f"Isso ira excluir {qtd} escala(s) do periodo filtrado ({periodo_texto}).")
+        if confirmar_exclusao("excluir_escala_periodo", f"Excluir {qtd} escala(s) do periodo filtrado"):
+            excluir_ebd_escala_lote(slug, escala["id_escala"].tolist())
+            st.success(f"{qtd} escala(s) excluida(s).")
+            st.rerun()
 
 
 def _render_escala_duplicar(slug, escala, opcoes_item):
@@ -2773,8 +2790,13 @@ def _render_escala(slug):
                 st.caption("Use para trocar a classe vinculada.")
                 _render_escala_editar(slug, escala, op_classes, opcoes_item)
             with col_excluir:
-                st.markdown("#### Excluir item da escala")
-                _render_escala_excluir(slug, opcoes_item)
+                st.markdown("#### Excluir escala")
+                periodo_texto_excluir = f"{_fmt_data(inicio)} a {_fmt_data(fim)}"
+                if filtro_classe != "Todas":
+                    periodo_texto_excluir += f" | Classe: {filtro_classe}"
+                if filtro_professor != "Todos":
+                    periodo_texto_excluir += f" | Professor: {filtro_professor}"
+                _render_escala_excluir(slug, escala, opcoes_item, periodo_texto_excluir)
 
     with tab_avisos:
         c1, c2 = st.columns(2)
