@@ -2736,6 +2736,10 @@ def _render_escala(slug):
             st.caption("Edite direto na tabela (data, professor, telefones, tema...) e clique em salvar.")
             exibir = escala.reset_index(drop=True).copy()
             exibir["data"] = exibir["data"].apply(_fmt_data)
+            ids_exibidos = tuple(int(i) for i in escala["id_escala"].tolist())
+            if st.session_state.get("escala_data_editor_ids") != ids_exibidos:
+                st.session_state["escala_data_editor_ids"] = ids_exibidos
+                st.session_state.pop("escala_data_editor", None)
             st.data_editor(
                 exibir[[
                     "data", "classe", "professor", "funcao_professor",
