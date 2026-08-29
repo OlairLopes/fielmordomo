@@ -180,10 +180,11 @@ def _tab_visao(dados):
         )
 
     st.markdown("#### Resultado por congregacao")
-    congregacoes = dados["por_igreja"].sort_values("resultado", ascending=False)
+    congregacoes = dados["por_igreja"]
     if congregacoes.empty:
         st.info("Nenhuma congregacao vinculada ao ministerio.")
         return
+    congregacoes = congregacoes.sort_values("resultado", ascending=False)
     st.dataframe(
         _tabela_financeira(congregacoes[[
             "igreja", "tipo_unidade", "membros_ativos", "entradas", "saidas",

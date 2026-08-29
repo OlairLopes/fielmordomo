@@ -166,7 +166,7 @@ st.set_page_config(
     page_title=APP_PAGE_TITLE,
     page_icon=_carregar_page_icon(),
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",
 )
 
 
@@ -1112,7 +1112,24 @@ def _renderizar_secretario_geral():
         )
 
 
+def _ocultar_chrome_streamlit():
+    """Esconde o menu/rodape/botao Deploy nativos do Streamlit em toda a app,
+    inclusive nas telas publicas (login/institucional), que rodam antes de
+    _injetar_css()."""
+    st.markdown(
+        """
+        <style>
+        #MainMenu, footer {display:none!important}
+        [data-testid="stStatusWidget"] {display:none!important}
+        [data-testid="stToolbar"] {display:none!important}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def main():
+    _ocultar_chrome_streamlit()
     _bloquear_acesso_fora_do_dominio_oficial()
 
     # ═══════════════════════════════════════════════════════════════════
