@@ -1,4 +1,3 @@
-import logging
 import datetime
 
 import pandas as pd
@@ -27,7 +26,14 @@ from data.repository import (
     salvar_gfc_reuniao,
     salvar_gfc_secretaria,
 )
-from utils.helpers import confirmar_exclusao, gerar_csv, normalizar_data_digitada, slug_da_sessao
+from utils.helpers import (
+    confirmar_exclusao,
+    data_iso as _data_iso,
+    filtrar_matriculas_validas_na_data as _filtrar_matriculas_validas_na_data,
+    gerar_csv,
+    normalizar_data_digitada,
+    slug_da_sessao,
+)
 
 
 TIPOS_CULTO_GFC = [
@@ -51,45 +57,6 @@ def _fmt_data(valor):
         return datetime.date.fromisoformat(str(valor)).strftime("%d/%m/%Y")
     except Exception:
         return str(valor or "")
-
-
-def _data_iso(valor):
-    try:
-        if isinstance(valor, datetime.datetime):
-            return valor.date().isoformat()
-        if isinstance(valor, datetime.date):
-            return valor.isoformat()
-        texto = str(valor or "").strip()
-        if not texto:
-            return ""
-        for formato in ("%Y-%m-%d", "%d/%m/%Y"):
-            try:
-                return datetime.datetime.strptime(texto, formato).date().isoformat()
-            except Exception:
-                logging.exception("Erro ignorado silenciosamente")
-        return datetime.date.fromisoformat(texto).isoformat()
-    except Exception:
-        return ""
-
-
-def _filtrar_matriculas_validas_na_data(matriculas, data_referencia):
-    if matriculas.empty:
-        return matriculas
-
-    data_ref = _data_iso(data_referencia)
-    if not data_ref:
-        return matriculas[matriculas["ativa"] == 1].copy()
-
-    dados = matriculas.copy()
-    if "data_inicio" not in dados.columns:
-        dados["data_inicio"] = ""
-    if "data_fim" not in dados.columns:
-        dados["data_fim"] = ""
-    inicio = dados["data_inicio"].apply(_data_iso)
-    fim = dados["data_fim"].apply(_data_iso)
-
-    validas = (inicio.eq("") | (inicio <= data_ref)) & (fim.eq("") | (fim >= data_ref))
-    return dados[validas].copy()
 
 
 def _grupo_opcoes(grupos):

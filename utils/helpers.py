@@ -1,3 +1,5 @@
+import datetime
+import logging
 import time
 
 import pandas as pd
@@ -90,6 +92,51 @@ def gerar_csv(df: pd.DataFrame) -> bytes:
     for coluna in seguro.select_dtypes(include=["object", "string"]).columns:
         seguro[coluna] = seguro[coluna].map(_sanitizar_csv)
     return seguro.to_csv(index=False).encode("utf-8-sig")
+
+
+def data_iso(valor) -> str:
+    """Normaliza uma data (date, datetime ou string dd/mm/aaaa ou aaaa-mm-dd)
+    para o formato ISO aaaa-mm-dd. Retorna string vazia se nao reconhecer."""
+    try:
+        if isinstance(valor, datetime.datetime):
+            return valor.date().isoformat()
+        if isinstance(valor, datetime.date):
+            return valor.isoformat()
+        texto = str(valor or "").strip()
+        if not texto:
+            return ""
+        for formato in ("%Y-%m-%d", "%d/%m/%Y"):
+            try:
+                return datetime.datetime.strptime(texto, formato).date().isoformat()
+            except Exception:
+                logging.exception("Erro ignorado silenciosamente")
+        return datetime.date.fromisoformat(texto).isoformat()
+    except Exception:
+        return ""
+
+
+def filtrar_matriculas_validas_na_data(matriculas: pd.DataFrame, data_referencia) -> pd.DataFrame:
+    """Filtra matriculas vigentes na data de referencia, com base nas colunas
+    data_inicio/data_fim (matricula ativa quando a data cai dentro do
+    intervalo, ou quando o intervalo esta em aberto). Sem data de referencia
+    valida, cai de volta ao flag booleano 'ativa'."""
+    if matriculas.empty:
+        return matriculas
+
+    data_ref = data_iso(data_referencia)
+    if not data_ref:
+        return matriculas[matriculas["ativa"] == 1].copy()
+
+    dados = matriculas.copy()
+    if "data_inicio" not in dados.columns:
+        dados["data_inicio"] = ""
+    if "data_fim" not in dados.columns:
+        dados["data_fim"] = ""
+    inicio = dados["data_inicio"].apply(data_iso)
+    fim = dados["data_fim"].apply(data_iso)
+
+    validas = (inicio.eq("") | (inicio <= data_ref)) & (fim.eq("") | (fim >= data_ref))
+    return dados[validas].copy()
 
 
 def slug_da_sessao() -> str:
