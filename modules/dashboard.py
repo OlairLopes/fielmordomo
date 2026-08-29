@@ -1351,11 +1351,22 @@ def _injetar_css():
     """, unsafe_allow_html=True)
 
 
-def _card(titulo, valor, nota=""):
+def _card(titulo, valor, nota="", icone=None, cor=None):
+    badge_html = ""
+    classe = "dash-card"
+    if icone:
+        classe += " tem-selo"
+        badge_html = (
+            f'<div class="dash-card-selo" style="background:{cor or "#0B3A66"}">'
+            f'<span class="material-symbols-rounded">{_escape(icone)}</span></div>'
+        )
     st.markdown(
-        f'<div class="dash-card"><div class="dash-label">{_escape(titulo)}</div>'
+        f'<div class="{classe}">{badge_html}'
+        f'<div class="dash-card-texto">'
+        f'<div class="dash-label">{_escape(titulo)}</div>'
         f'<div class="dash-value">{_escape(valor)}</div>'
-        f'<div class="dash-note">{_escape(nota)}</div></div>',
+        f'<div class="dash-note">{_escape(nota)}</div>'
+        f'</div></div>',
         unsafe_allow_html=True,
     )
 
@@ -2047,11 +2058,6 @@ def render():
         _card("Participacao dizimistas ativos", f"{pct_diz:.1f}%",
               f"{qtd_diz} de {membros_n} membros ativos")
 
-    a1, a2, a3 = st.columns(3)
-    with a1: _card("Entradas YTD", formatar_moeda(ent_ytd), f"{_variacao(ent_ytd, ent_ytd_ant)} vs mesmo periodo anterior")
-    with a2: _card("Saidas YTD", formatar_moeda(sai_ytd))
-    with a3: _card("Saldo YTD", formatar_moeda(saldo_ytd))
-
     tab_visao, tab_despesas, tab_receitas, tab_pastoral = st.tabs([
         "Visao Executiva", "Despesas", "Receitas",
         "Acompanhamento Pastoral",
@@ -2259,6 +2265,12 @@ def render():
             "Area restrita. Exibe dados individuais de contribuicao. "
             "Acesse somente quando necessario e nao compartilhe exportacoes sem autorizacao."
         )
+
+        a1, a2, a3 = st.columns(3)
+        with a1: _card("Entradas YTD", formatar_moeda(ent_ytd), f"{_variacao(ent_ytd, ent_ytd_ant)} vs mesmo periodo anterior")
+        with a2: _card("Saidas YTD", formatar_moeda(sai_ytd))
+        with a3: _card("Saldo YTD", formatar_moeda(saldo_ytd))
+
         if _autorizacao_pastoral(slug):
             # ═══ Saude financeira (transferido da antiga aba Saude Financeira) ═══
             _secao_dashboard(
