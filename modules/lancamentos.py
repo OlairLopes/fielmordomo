@@ -1567,6 +1567,16 @@ def render():
     if "mnl_aberto" not in st.session_state:
         st.session_state["mnl_aberto"] = False
 
+    # Streamlit so permite um dialogo aberto por execucao. Se outra acao
+    # (Visualizar/Editar/Excluir) foi acionada nesta mesma execucao, fecha
+    # o "Novo lancamento" para evitar StreamlitAPIException por dialogos
+    # simultaneos.
+    if any(
+        st.session_state.get(k)
+        for k in ("btn_abrir_view_lanc", "btn_abrir_edit_lanc", "btn_abrir_del_lanc")
+    ):
+        st.session_state["mnl_aberto"] = False
+
     if st.button(
         "➕ Novo lancamento",
         type="primary",
