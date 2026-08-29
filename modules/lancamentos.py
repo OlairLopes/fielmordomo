@@ -1068,6 +1068,7 @@ def modal_novo_lancamento(slug, membros, fornec):
 
     if cancelar:
         st.session_state["mnl_ver"] += 1
+        st.session_state["mnl_aberto"] = False
         st.rerun()
 
     if salvar:
@@ -1535,12 +1536,18 @@ def render():
     st.subheader("💰 Lancamentos financeiros")
 
     # ─── BOTAO PRINCIPAL: Novo lancamento ──────────────────────────
+    if "mnl_aberto" not in st.session_state:
+        st.session_state["mnl_aberto"] = False
+
     if st.button(
         "➕ Novo lancamento",
         type="primary",
         use_container_width=True,
         key="btn_abrir_novo_lanc",
     ):
+        st.session_state["mnl_aberto"] = True
+
+    if st.session_state["mnl_aberto"]:
         modal_novo_lancamento(slug, membros, fornec)
 
     # ─── Importar dizimos via Pix (mantido como expander) ──────────
