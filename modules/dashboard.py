@@ -1914,6 +1914,8 @@ td {{ padding:6px 8px;border-bottom:1px solid #F1F5F9;color:#334155; }}
 
 def render():
     _injetar_css()
+    st.markdown("## 📊 Dashboard Financeiro")
+    st.caption("Visao executiva para decisao, conferencia e acompanhamento de tendencias.")
     slug = slug_da_sessao()
     df_lanc, df_cad = carregar_lancamentos(slug), carregar_cadastros(slug)
     if df_lanc.empty:
@@ -2009,35 +2011,12 @@ def render():
 
     dizimo_mes, _, _ = _totais_dizimo(ref)
 
-    st.markdown("## 📊 Dashboard Financeiro")
-    st.caption("Visao executiva para decisao, conferencia e acompanhamento de tendencias.")
     dashboard_restrito = st.session_state.get("modo") == "pastor_auxiliar"
     if dashboard_restrito:
         st.info(
             "Acesso de Pastor Auxiliar: as areas Saude Financeira, Qualidade "
             "e Acompanhamento Pastoral nao estao disponiveis neste perfil."
         )
-
-    # ═══ NOVO: Botao de exportacao executiva no topo ═══
-    if not dashboard_restrito:
-        col_btn_exp, _ = st.columns([1, 3])
-        with col_btn_exp:
-            if st.button("📄 Exportar relatorio executivo", key=_sk("btn_export_exec", slug),
-                         use_container_width=True):
-                html_relatorio = _gerar_html_relatorio_executivo(
-                    igreja, slug, inicio_mes, fim_mes, ent, sai, saldo,
-                    ticket_info, score, saude_info, insight_texto,
-                )
-                st.session_state[_sk("html_export", slug)] = html_relatorio
-
-        if _sk("html_export", slug) in st.session_state:
-            st.download_button(
-                "⬇️ Baixar relatorio (HTML - abra no navegador e imprima como PDF)",
-                data=st.session_state[_sk("html_export", slug)],
-                file_name=f"relatorio_executivo_{inicio_mes:%Y%m%d}_{fim_mes:%Y%m%d}.html",
-                mime="text/html",
-                key=_sk("dl_export", slug),
-            )
 
     _legenda_cores()
 
@@ -2276,6 +2255,26 @@ def render():
             "Analise do valor medio por dizimista e do potencial de arrecadacao vs realizado.",
         )
         _render_ticket_medio_gap(ticket_info)
+
+        # ═══ Botao de exportacao executiva ═══
+        col_btn_exp, _ = st.columns([1, 3])
+        with col_btn_exp:
+            if st.button("📄 Exportar relatorio executivo", key=_sk("btn_export_exec", slug),
+                         use_container_width=True):
+                html_relatorio = _gerar_html_relatorio_executivo(
+                    igreja, slug, inicio_mes, fim_mes, ent, sai, saldo,
+                    ticket_info, score, saude_info, insight_texto,
+                )
+                st.session_state[_sk("html_export", slug)] = html_relatorio
+
+        if _sk("html_export", slug) in st.session_state:
+            st.download_button(
+                "⬇️ Baixar relatorio (HTML - abra no navegador e imprima como PDF)",
+                data=st.session_state[_sk("html_export", slug)],
+                file_name=f"relatorio_executivo_{inicio_mes:%Y%m%d}_{fim_mes:%Y%m%d}.html",
+                mime="text/html",
+                key=_sk("dl_export", slug),
+            )
 
         if _autorizacao_pastoral(slug):
             # ═══ Saude financeira (transferido da antiga aba Saude Financeira) ═══
