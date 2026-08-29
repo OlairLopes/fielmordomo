@@ -342,6 +342,7 @@ def _renderizar_auto_checkin():
         section[data-testid="stSidebar"] { display: none !important; }
         [data-testid="stSidebarCollapsedControl"] { display: none !important; }
         #MainMenu, footer { display: none !important; }
+        [data-testid="stStatusWidget"] { display: none !important; }
         .block-container {
             padding-top: 1.5rem !important;
             padding-left: 1rem !important;
@@ -463,6 +464,7 @@ def _injetar_css():
         .notranslate { translate:no; }
         header[data-testid="stHeader"] {background:transparent!important;height:3rem!important}
         #MainMenu,footer {display:none!important}
+        [data-testid="stStatusWidget"] {display:none!important}
         [data-testid="stSidebarCollapsedControl"] {display:flex!important;visibility:visible!important;
             opacity:1!important;position:fixed!important;top:12px!important;left:12px!important;
             z-index:999999!important;background:#061B44!important;border-radius:10px!important;
