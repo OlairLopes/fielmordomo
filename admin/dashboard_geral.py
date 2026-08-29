@@ -382,29 +382,3 @@ def render():
 
 def render_dashboard_geral():
     render()
-
-
-def exibir_dashboard_geral():
-    render()
-
-
-def dashboard_geral():
-    render()
-
-
-def renderizar():
-    render()
-
-
-def renderizar_dashboard_geral():
-    render()
-
-
-def aba_dashboard_geral():
-    render()
-
-
-__all__ = [
-    "render", "render_dashboard_geral", "exibir_dashboard_geral", "dashboard_geral",
-    "renderizar", "renderizar_dashboard_geral", "aba_dashboard_geral",
-]
