@@ -827,6 +827,22 @@ def _sidebar_secretario_geral(pagina_atual, igreja, secretario):
     )
 
 
+def _renderizar_modulo(caminho_modulo, pagina, contexto_log=None):
+    """Importa e renderiza o modulo da pagina atual, com log e mensagem de
+    erro padronizados caso a renderizacao falhe."""
+    try:
+        _importar(caminho_modulo).render()
+    except Exception as ex:
+        if contexto_log:
+            LOGGER.exception("Falha ao carregar a página %s para %s.", pagina, contexto_log)
+        else:
+            LOGGER.exception("Falha ao carregar a página %s.", pagina)
+        st.error(
+            "Não foi possível carregar esta página. "
+            f"Tipo do erro: {type(ex).__name__}. Consulte o log do sistema."
+        )
+
+
 def _renderizar_admin():
     _sidebar_admin()
     try:
@@ -849,14 +865,7 @@ def _renderizar_igreja():
         st.session_state["pagina"] = pagina
     _sidebar_igreja(pagina, igreja)
     _, caminho_modulo = PAGINAS_IGREJA[pagina]
-    try:
-        _importar(caminho_modulo).render()
-    except Exception as ex:
-        LOGGER.exception("Falha ao carregar a página %s.", pagina)
-        st.error(
-            "Não foi possível carregar esta página. "
-            f"Tipo do erro: {type(ex).__name__}. Consulte o log do sistema."
-        )
+    _renderizar_modulo(caminho_modulo, pagina)
 
 
 def _renderizar_perfil_simples(
@@ -879,14 +888,7 @@ def _renderizar_perfil_simples(
         st.session_state["pagina"] = pagina
     sidebar_func(pagina, igreja, usuario)
     _, caminho_modulo = paginas[pagina]
-    try:
-        _importar(caminho_modulo).render()
-    except Exception as ex:
-        LOGGER.exception("Falha ao carregar a página %s para %s.", pagina, contexto_log)
-        st.error(
-            "Não foi possível carregar esta página. "
-            f"Tipo do erro: {type(ex).__name__}. Consulte o log do sistema."
-        )
+    _renderizar_modulo(caminho_modulo, pagina, contexto_log)
 
 
 def _renderizar_tesoureiro():
