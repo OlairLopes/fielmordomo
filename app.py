@@ -365,7 +365,7 @@ def _renderizar_auto_checkin():
         )
         st.markdown(
             f'<p style="text-align:center;margin-top:20px;">'
-            f'<a href="{DOMINIO_OFICIAL}" style="color:#0F6E56;">Voltar para o site</a>'
+            f'<a href="{DOMINIO_OFICIAL}" style="color:#061B44;">Voltar para o site</a>'
             f'</p>',
             unsafe_allow_html=True,
         )
@@ -381,7 +381,7 @@ def _renderizar_auto_checkin():
         )
         st.markdown(
             f'<p style="text-align:center;margin-top:20px;">'
-            f'<a href="{DOMINIO_OFICIAL}" style="color:#0F6E56;">Voltar para o site</a>'
+            f'<a href="{DOMINIO_OFICIAL}" style="color:#061B44;">Voltar para o site</a>'
             f'</p>',
             unsafe_allow_html=True,
         )
