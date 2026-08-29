@@ -1128,8 +1128,31 @@ def _ocultar_chrome_streamlit():
     )
 
 
+def _aplicar_tipografia():
+    """Tipografia unica do sistema: Fraunces nos titulos, Public Sans no
+    corpo. Aplicada antes de qualquer tela (publica ou autenticada) para
+    que login, institucional e app interno compartilhem a mesma fonte."""
+    st.markdown(
+        """
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <style>
+        html, body, [class*="css"] {
+            font-family: 'Public Sans', -apple-system, 'Segoe UI', Arial, sans-serif;
+        }
+        h1, h2, h3 {
+            font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def main():
     _ocultar_chrome_streamlit()
+    _aplicar_tipografia()
     _bloquear_acesso_fora_do_dominio_oficial()
 
     # ═══════════════════════════════════════════════════════════════════

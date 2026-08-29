@@ -223,13 +223,13 @@ def _faixas_acompanhamento(membros, dizimos, hoje, dias_ativo):
 
 def _layout_grafico(altura=380, margem=None, **extras):
     layout = {
-        "template": "plotly_dark",
+        "template": "plotly_white",
         "autosize": True,
         "height": altura,
         "margin": margem or dict(t=25, b=35, l=20, r=20),
         "paper_bgcolor": "rgba(0,0,0,0)",
         "plot_bgcolor": "rgba(0,0,0,0)",
-        "font": dict(color="#CBD5E1"),
+        "font": dict(color="#475569"),
         "hovermode": False,
         "dragmode": False,
     }
@@ -772,7 +772,7 @@ def _grafico_rosca(
     total_label="Total",
     valor_central=None,
     label_central=None,
-    cor_central="#F1F5F9",
+    cor_central="#10213A",
 ):
     """Renderiza o grafico de rosca e, logo abaixo, a legenda de cores customizada."""
     total = float(resumo[valores].sum())
@@ -790,12 +790,12 @@ def _grafico_rosca(
         hole=.68,
         textinfo="percent",
         textposition="outside",
-        textfont=dict(size=12, color="#CBD5E1"),
+        textfont=dict(size=12, color="#475569"),
         hovertemplate="<b>%{label}</b><br>%{customdata}<extra></extra>",
         customdata=[formatar_moeda(valor) for valor in resumo[valores]],
         marker=dict(
             colors=cores_fatias,
-            line=dict(color="#1E293B", width=2),
+            line=dict(color="#FFFFFF", width=2),
         ),
     ))
     fig.add_annotation(
@@ -827,7 +827,7 @@ def _grafico_ranking(resumo, rotulos, valores, cor):
         marker_color=cor,
         text=[formatar_moeda(valor) for valor in dados[valores]],
         textposition="outside",
-        textfont=dict(size=10, color="#CBD5E1"),
+        textfont=dict(size=10, color="#475569"),
     ))
     fig.update_layout(**_layout_grafico(
         altura=max(320, len(dados) * 34 + 100),
@@ -978,12 +978,12 @@ def _render_saude_financeira(df, mes_ref, slug):
         ],
         text=[formatar_moeda(valor) for valor in projecoes["Saldo projetado"]],
         textposition="outside",
-        textfont=dict(size=11, color="#CBD5E1"),
+        textfont=dict(size=11, color="#475569"),
     ))
     fig_projecao.update_layout(**_layout_grafico(
         altura=340,
         xaxis=dict(fixedrange=True, showgrid=False),
-        yaxis=dict(fixedrange=True, gridcolor="#334155", tickformat=",.0f"),
+        yaxis=dict(fixedrange=True, gridcolor="#E2E8F0", tickformat=",.0f"),
     ))
     st.plotly_chart(fig_projecao, use_container_width=True, config=CONFIG_PLOTLY)
     st.caption(
@@ -1117,14 +1117,13 @@ def _mensagem_fidelidade(nome, resumo_mensal):
 def _injetar_css():
     st.markdown("""
     <style>
-    .stApp { background-color:#0F172A; }
-    h1,h2,h3,h4 { color:#F1F5F9 !important; }
-    .dash-card { background:#1E293B;border:1px solid #334155;border-radius:12px;padding:16px;
+    h1,h2,h3,h4 { color:#10213A !important; }
+    .dash-card { background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:16px;
         height:100%;display:flex;flex-direction:column;justify-content:space-between;
-        min-height:112px;box-sizing:border-box; }
-    .dash-label { color:#94A3B8;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em; }
-    .dash-value { color:#F8FAFC;font-size:1.45rem;font-weight:700;margin-top:5px; }
-    .dash-note { color:#CBD5E1;font-size:.76rem;margin-top:5px; }
+        min-height:112px;box-sizing:border-box;box-shadow:0 1px 2px rgba(10,27,61,.05); }
+    .dash-label { color:#64748B;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em; }
+    .dash-value { color:#10213A;font-size:1.45rem;font-weight:700;margin-top:5px; }
+    .dash-note { color:#475569;font-size:.76rem;margin-top:5px; }
 
     /* ═══ Grade uniforme: cards com mesma altura e espacamento consistente ═══ */
     div[data-testid="stHorizontalBlock"] {
@@ -1151,10 +1150,10 @@ def _injetar_css():
         .dash-card { min-height:96px;padding:12px; }
     }
     .stPlotlyChart, [data-testid="stPlotlyChart"] {
-        background:#1E293B;
-        border:1px solid #334155;
+        background:#FFFFFF;
+        border:1px solid #E2E8F0;
         border-radius:14px;
-        box-shadow:0 10px 24px rgba(0,0,0,.28);
+        box-shadow:0 1px 2px rgba(10,27,61,.05);
         box-sizing:border-box;
         max-width:100%;
         min-width:0;
@@ -1174,115 +1173,115 @@ def _injetar_css():
     @media (max-width:640px) {
         .stPlotlyChart, [data-testid="stPlotlyChart"] {
             border-radius:10px;
-            box-shadow:0 6px 16px rgba(0,0,0,.24);
+            box-shadow:0 1px 2px rgba(10,27,61,.05);
             padding:4px;
         }
     }
-    .dash-section { color:#F1F5F9;font-size:1rem;margin:22px 0 10px;padding-bottom:8px;border-bottom:1px solid #334155; }
-    .dash-section span { color:#94A3B8;display:block;font-size:.78rem;font-weight:400;margin-top:3px; }
+    .dash-section { color:#10213A;font-size:1rem;margin:22px 0 10px;padding-bottom:8px;border-bottom:1px solid #E2E8F0; }
+    .dash-section span { color:#64748B;display:block;font-size:.78rem;font-weight:400;margin-top:3px; }
     .dash-legenda { display:flex;flex-wrap:wrap;gap:9px 16px;margin:10px 0 14px; }
-    .dash-legenda span { color:#CBD5E1;font-size:.78rem;white-space:nowrap; }
+    .dash-legenda span { color:#475569;font-size:.78rem;white-space:nowrap; }
     .dash-legenda i { border-radius:50%;display:inline-block;height:10px;margin-right:6px;width:10px; }
-    .pastoral-card { background:#1E293B;border:1px solid #334155;border-radius:12px;padding:14px;text-align:center;height:100%; }
-    .pastoral-card div { color:#CBD5E1;font-size:.78rem; }
+    .pastoral-card { background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:14px;text-align:center;height:100%; }
+    .pastoral-card div { color:#475569;font-size:.78rem; }
     .pastoral-card strong { display:block;font-size:1.9rem;margin-top:5px; }
-    .pastoral-card span { color:#94A3B8;font-size:.75rem; }
-    .pastoral-card.amarelo strong { color:#F59E0B; }
-    .pastoral-card.laranja strong { color:#F97316; }
-    .pastoral-card.vermelho strong { color:#EF4444; }
+    .pastoral-card span { color:#64748B;font-size:.75rem; }
+    .pastoral-card.amarelo strong { color:#B45309; }
+    .pastoral-card.laranja strong { color:#C2410C; }
+    .pastoral-card.vermelho strong { color:#DC2626; }
     .fidelidade-grid { display:flex;flex-wrap:wrap;gap:8px;margin:14px 0; }
     .fidelidade-mes { border-radius:8px;min-width:96px;padding:9px 11px;text-align:center; }
     .fidelidade-mes strong { display:block;font-size:.8rem; }
     .fidelidade-mes span { display:block;font-size:.7rem;margin-top:4px; }
-    .fidelidade-mes.presente { background:#065F46;color:#ECFDF5; }
-    .fidelidade-mes.ausente { background:#374151;color:#CBD5E1;opacity:.75; }
-    .fidelidade-aviso { background:#1E293B;border-left:4px solid;border-radius:8px;margin:12px 0 18px;padding:13px 16px; }
+    .fidelidade-mes.presente { background:#DCFCE7;color:#166534; }
+    .fidelidade-mes.ausente { background:#F1F5F9;color:#64748B; }
+    .fidelidade-aviso { background:#FFFFFF;border:1px solid #E2E8F0;border-left:4px solid;border-radius:8px;margin:12px 0 18px;padding:13px 16px; }
     .fidelidade-aviso strong { display:block;font-size:.95rem; }
-    .fidelidade-aviso span { color:#CBD5E1;display:block;font-size:.82rem;margin-top:5px; }
-    .fidelidade-aviso.critico { border-color:#DC2626; }
-    .fidelidade-aviso.critico strong { color:#F87171; }
-    .fidelidade-aviso.atencao { border-color:#F97316; }
-    .fidelidade-aviso.atencao strong { color:#FB923C; }
-    .fidelidade-aviso.moderado { border-color:#F59E0B; }
-    .fidelidade-aviso.moderado strong { color:#FBBF24; }
-    .fidelidade-aviso.positivo { border-color:#10B981; }
-    .fidelidade-aviso.positivo strong { color:#34D399; }
-    .saude-alerta { background:#1E293B;border-left:4px solid;border-radius:8px;
-        color:#CBD5E1;font-size:.86rem;margin:8px 0;padding:12px 15px; }
-    .saude-alerta.critico { border-color:#DC2626; }
-    .saude-alerta.atencao { border-color:#F59E0B; }
+    .fidelidade-aviso span { color:#475569;display:block;font-size:.82rem;margin-top:5px; }
+    .fidelidade-aviso.critico { border-left-color:#DC2626; }
+    .fidelidade-aviso.critico strong { color:#DC2626; }
+    .fidelidade-aviso.atencao { border-left-color:#F97316; }
+    .fidelidade-aviso.atencao strong { color:#C2410C; }
+    .fidelidade-aviso.moderado { border-left-color:#F59E0B; }
+    .fidelidade-aviso.moderado strong { color:#B45309; }
+    .fidelidade-aviso.positivo { border-left-color:#10B981; }
+    .fidelidade-aviso.positivo strong { color:#0F766E; }
+    .saude-alerta { background:#FFFFFF;border:1px solid #E2E8F0;border-left:4px solid;border-radius:8px;
+        color:#475569;font-size:.86rem;margin:8px 0;padding:12px 15px; }
+    .saude-alerta.critico { border-left-color:#DC2626; }
+    .saude-alerta.atencao { border-left-color:#F59E0B; }
 
     /* ═══ Insight textual no topo ═══ */
     .insight-topo {
-        background:linear-gradient(135deg,#1E293B 0%,#334155 100%);
-        border:1px solid #475569;border-left:5px solid #D4AF37;
+        background:linear-gradient(135deg,#FFFFFF 0%,#FBF3DC 100%);
+        border:1px solid #E2E8F0;border-left:5px solid #D4AF37;
         border-radius:12px;padding:18px 22px;margin:14px 0 20px;
-        color:#F1F5F9;font-size:.94rem;line-height:1.55;
-        box-shadow:0 6px 16px rgba(0,0,0,.2);
+        color:#10213A;font-size:.94rem;line-height:1.55;
+        box-shadow:0 1px 2px rgba(10,27,61,.05);
     }
-    .insight-topo strong { color:#FCD34D; }
+    .insight-topo strong { color:#9C7317; }
 
     /* ═══ Score de saude 0-100 ═══ */
     .score-card {
-        background:#1E293B;border:1px solid #334155;border-radius:14px;
+        background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;
         padding:22px;text-align:center;position:relative;overflow:hidden;
     }
     .score-card .valor { font-size:3.4rem;font-weight:800;line-height:1; }
-    .score-card .barra { color:#94A3B8;font-size:.72rem;text-transform:uppercase;
+    .score-card .barra { color:#64748B;font-size:.72rem;text-transform:uppercase;
         letter-spacing:.08em;margin-top:6px; }
     .score-card .classificacao { font-size:1rem;font-weight:700;margin-top:6px;
         text-transform:uppercase;letter-spacing:.06em; }
-    .score-card.excelente .valor,.score-card.excelente .classificacao { color:#10B981; }
-    .score-card.atencao .valor,.score-card.atencao .classificacao { color:#F59E0B; }
-    .score-card.critico .valor,.score-card.critico .classificacao { color:#EF4444; }
+    .score-card.excelente .valor,.score-card.excelente .classificacao { color:#0F766E; }
+    .score-card.atencao .valor,.score-card.atencao .classificacao { color:#B45309; }
+    .score-card.critico .valor,.score-card.critico .classificacao { color:#DC2626; }
 
     .score-componentes { margin-top:12px; }
     .score-comp-linha { display:flex;justify-content:space-between;align-items:center;
-        margin:6px 0;font-size:.8rem;color:#CBD5E1; }
-    .score-comp-linha .barra-bg { background:#334155;border-radius:4px;
+        margin:6px 0;font-size:.8rem;color:#475569; }
+    .score-comp-linha .barra-bg { background:#E2E8F0;border-radius:4px;
         height:6px;margin-left:12px;overflow:hidden;flex:1;max-width:60%; }
     .score-comp-linha .barra-fg { background:#10B981;height:100%;border-radius:4px; }
 
     /* ═══ Churn alert ═══ */
     .churn-alert {
-        background:#7F1D1D;border:1px solid #B91C1C;border-radius:12px;
-        color:#FEE2E2;padding:16px 20px;margin:12px 0;
+        background:#FEE2E2;border:1px solid #FCA5A5;border-radius:12px;
+        color:#7F1D1D;padding:16px 20px;margin:12px 0;
         display:flex;align-items:center;gap:14px;
     }
     .churn-alert .icone { font-size:2rem; }
     .churn-alert .conteudo strong { display:block;font-size:1rem;margin-bottom:2px; }
-    .churn-alert .conteudo span { font-size:.85rem;color:#FCA5A5; }
+    .churn-alert .conteudo span { font-size:.85rem;color:#B91C1C; }
 
     /* ═══ Curva ABC (Pareto) ═══ */
     .abc-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0; }
     .abc-card {
-        background:#1E293B;border-left:4px solid;border-radius:8px;padding:14px;
+        background:#FFFFFF;border:1px solid #E2E8F0;border-left:4px solid;border-radius:8px;padding:14px;
     }
-    .abc-card.classe-A { border-color:#DC2626; }
-    .abc-card.classe-B { border-color:#F59E0B; }
-    .abc-card.classe-C { border-color:#10B981; }
+    .abc-card.classe-A { border-left-color:#DC2626; }
+    .abc-card.classe-B { border-left-color:#F59E0B; }
+    .abc-card.classe-C { border-left-color:#10B981; }
     .abc-card .titulo { font-size:1.2rem;font-weight:800;margin-bottom:8px; }
-    .abc-card.classe-A .titulo { color:#F87171; }
-    .abc-card.classe-B .titulo { color:#FBBF24; }
-    .abc-card.classe-C .titulo { color:#34D399; }
-    .abc-card .stat { color:#F1F5F9;font-size:.9rem;margin:3px 0; }
+    .abc-card.classe-A .titulo { color:#DC2626; }
+    .abc-card.classe-B .titulo { color:#B45309; }
+    .abc-card.classe-C .titulo { color:#0F766E; }
+    .abc-card .stat { color:#10213A;font-size:.9rem;margin:3px 0; }
     .abc-card .stat strong { font-size:1.05rem; }
-    .abc-card .sub { color:#94A3B8;font-size:.72rem; }
+    .abc-card .sub { color:#64748B;font-size:.72rem; }
     .abc-insight {
-        background:#1E293B;border-left:4px solid #D4AF37;border-radius:8px;
-        padding:12px 16px;margin:10px 0;color:#F1F5F9;font-size:.88rem;
+        background:#FFFFFF;border:1px solid #E2E8F0;border-left:4px solid #D4AF37;border-radius:8px;
+        padding:12px 16px;margin:10px 0;color:#10213A;font-size:.88rem;
     }
 
     /* ═══ Metas com barra de progresso ═══ */
     .meta-card {
-        background:#1E293B;border:1px solid #334155;border-radius:12px;
+        background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;
         padding:16px 18px;margin:10px 0;
     }
     .meta-card .cabecalho { display:flex;justify-content:space-between;
-        margin-bottom:8px;color:#CBD5E1; }
-    .meta-card .cabecalho strong { color:#F1F5F9; }
+        margin-bottom:8px;color:#475569; }
+    .meta-card .cabecalho strong { color:#10213A; }
     .meta-progresso {
-        background:#334155;border-radius:6px;height:12px;overflow:hidden;
+        background:#E2E8F0;border-radius:6px;height:12px;overflow:hidden;
         position:relative;
     }
     .meta-progresso-barra {
@@ -1295,7 +1294,7 @@ def _injetar_css():
     .meta-progresso-barra.baixa {
         background:linear-gradient(90deg,#DC2626,#F87171);
     }
-    .meta-card .rodape { color:#94A3B8;font-size:.75rem;margin-top:6px; }
+    .meta-card .rodape { color:#64748B;font-size:.75rem;margin-top:6px; }
 
     /* ═══ Heatmap sazonalidade ═══ */
     .heatmap-grid {
@@ -1303,51 +1302,51 @@ def _injetar_css():
         margin:12px 0;
     }
     .heatmap-mes {
-        background:#1E293B;border:1px solid #334155;border-radius:8px;
+        background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;
         padding:10px 8px;text-align:center;transition:transform .15s;
     }
     .heatmap-mes:hover { transform:scale(1.03); }
-    .heatmap-mes .nome { color:#CBD5E1;font-size:.72rem;
+    .heatmap-mes .nome { color:#475569;font-size:.72rem;
         text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px; }
-    .heatmap-mes .valor { color:#F1F5F9;font-size:.9rem;font-weight:700; }
-    .heatmap-mes .info { color:#94A3B8;font-size:.65rem;margin-top:2px; }
+    .heatmap-mes .valor { color:#10213A;font-size:.9rem;font-weight:700; }
+    .heatmap-mes .info { color:#64748B;font-size:.65rem;margin-top:2px; }
 
     /* ═══ Previsao ═══ */
     .previsao-tabela {
-        background:#1E293B;border:1px solid #334155;border-radius:10px;
+        background:#FFFFFF;border:1px solid #E2E8F0;border-radius:10px;
         overflow:hidden;margin:12px 0;
     }
     .previsao-tabela .linha {
         display:grid;grid-template-columns:1fr 1fr 1fr 1fr;
-        padding:10px 14px;border-bottom:1px solid #334155;color:#CBD5E1;
+        padding:10px 14px;border-bottom:1px solid #E2E8F0;color:#475569;
         font-size:.86rem;align-items:center;
     }
     .previsao-tabela .linha:last-child { border-bottom:none; }
     .previsao-tabela .linha.header {
-        background:#334155;color:#F1F5F9;font-weight:700;
+        background:#F1F5F9;color:#10213A;font-weight:700;
         font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;
     }
-    .previsao-tabela .saldo-positivo { color:#34D399;font-weight:600; }
-    .previsao-tabela .saldo-negativo { color:#F87171;font-weight:600; }
+    .previsao-tabela .saldo-positivo { color:#0F766E;font-weight:600; }
+    .previsao-tabela .saldo-negativo { color:#DC2626;font-weight:600; }
 
     /* ═══ Botoes de acao rapida ═══ */
     .acao-rapida-info {
-        background:#1E3A5F;border:1px solid #2563EB;border-radius:10px;
-        color:#DBEAFE;padding:12px 16px;margin:10px 0;font-size:.85rem;
+        background:#EFF6FF;border:1px solid #93C5FD;border-radius:10px;
+        color:#1E3A5F;padding:12px 16px;margin:10px 0;font-size:.85rem;
     }
-    .acao-rapida-info strong { color:#93C5FD; }
+    .acao-rapida-info strong { color:#1D4ED8; }
 
     /* ═══ Cruzamento com geo ═══ */
     .geo-classe-card {
-        background:#1E293B;border:1px solid #334155;border-radius:10px;
+        background:#FFFFFF;border:1px solid #E2E8F0;border-radius:10px;
         padding:14px;text-align:center;
     }
-    .geo-classe-card .qtd { font-size:2rem;font-weight:800;color:#F1F5F9; }
-    .geo-classe-card .rotulo { color:#CBD5E1;font-size:.78rem;margin-top:2px; }
-    .geo-classe-card.engajado .qtd { color:#10B981; }
-    .geo-classe-card.presente_sem_contribuir .qtd { color:#F59E0B; }
-    .geo-classe-card.contribui_sem_presenca .qtd { color:#3B82F6; }
-    .geo-classe-card.ausente_total .qtd { color:#EF4444; }
+    .geo-classe-card .qtd { font-size:2rem;font-weight:800;color:#10213A; }
+    .geo-classe-card .rotulo { color:#475569;font-size:.78rem;margin-top:2px; }
+    .geo-classe-card.engajado .qtd { color:#0F766E; }
+    .geo-classe-card.presente_sem_contribuir .qtd { color:#B45309; }
+    .geo-classe-card.contribui_sem_presenca .qtd { color:#1D4ED8; }
+    .geo-classe-card.ausente_total .qtd { color:#DC2626; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -1447,7 +1446,7 @@ def _render_score_saude(score):
         )
     st.markdown(
         f'<div class="score-card {classe}">'
-        f'<div class="valor">{score["emoji"]} {score["score_total"]:.0f}<span style="font-size:1.2rem;color:#94A3B8">/100</span></div>'
+        f'<div class="valor">{score["emoji"]} {score["score_total"]:.0f}<span style="font-size:1.2rem;color:#64748B">/100</span></div>'
         f'<div class="barra">Score de saude financeira</div>'
         f'<div class="classificacao">{_escape(score["classificacao"])}</div>'
         f'<div class="score-componentes">{componentes_html}</div>'
@@ -1703,7 +1702,7 @@ def _render_cruzamento_geo(df_cruzamento):
                 f'<div class="geo-classe-card {chave}">'
                 f'<div class="qtd">{qtd}</div>'
                 f'<div class="rotulo">{_escape(rotulo)}</div>'
-                f'<div class="rotulo" style="font-size:.68rem;color:#94A3B8">{_escape(descricao)}</div>'
+                f'<div class="rotulo" style="font-size:.68rem;color:#64748B">{_escape(descricao)}</div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
@@ -2091,7 +2090,7 @@ def render():
                 marker_color=CORES["entrada"],
                 text=[formatar_moeda(v) if v else "" for v in serie["entradas"]],
                 textposition="outside",
-                textfont=dict(size=9, color="#CBD5E1"),
+                textfont=dict(size=9, color="#475569"),
             ),
             go.Bar(
                 name="Saidas",
@@ -2100,7 +2099,7 @@ def render():
                 marker_color=CORES["saida"],
                 text=[formatar_moeda(v) if v else "" for v in serie["saidas"]],
                 textposition="outside",
-                textfont=dict(size=9, color="#CBD5E1"),
+                textfont=dict(size=9, color="#475569"),
             ),
             go.Scatter(
                 name="Saldo",
@@ -2118,8 +2117,8 @@ def render():
             margem=dict(t=25, b=40, l=20, r=20),
             barmode="group",
             showlegend=False,
-            xaxis=dict(fixedrange=True, gridcolor="#334155"),
-            yaxis=dict(fixedrange=True, gridcolor="#334155", tickformat=",.0f"),
+            xaxis=dict(fixedrange=True, gridcolor="#E2E8F0"),
+            yaxis=dict(fixedrange=True, gridcolor="#E2E8F0", tickformat=",.0f"),
         ))
         st.plotly_chart(fig, use_container_width=True, config=CONFIG_PLOTLY)
         st.markdown(
@@ -2221,8 +2220,8 @@ def render():
                     margem=dict(t=25, b=40, l=20, r=20),
                     barmode="group",
                     showlegend=False,
-                    xaxis=dict(fixedrange=True, gridcolor="#334155"),
-                    yaxis=dict(fixedrange=True, gridcolor="#334155", tickformat=",.0f"),
+                    xaxis=dict(fixedrange=True, gridcolor="#E2E8F0"),
+                    yaxis=dict(fixedrange=True, gridcolor="#E2E8F0", tickformat=",.0f"),
                 ))
                 st.plotly_chart(fig_temporal, use_container_width=True, config=CONFIG_PLOTLY)
                 _render_legenda([
@@ -2344,7 +2343,7 @@ def render():
                     marker_color=CORES["alerta"],
                     text=pendencias["Quantidade"],
                     textposition="outside",
-                    textfont=dict(size=11, color="#CBD5E1"),
+                    textfont=dict(size=11, color="#475569"),
                 ))
                 fig_qualidade.update_layout(**_layout_grafico(
                     altura=340,
@@ -2416,7 +2415,7 @@ def render():
                     marker_color=CORES["dizimo"],
                     text=[formatar_moeda(v) if v else "" for v in valores_dizimos],
                     textposition="outside",
-                    textfont=dict(size=10, color="#CBD5E1"),
+                    textfont=dict(size=10, color="#475569"),
                 ))
                 tem_tendencia = sum(1 for valor in valores_dizimos if valor > 0) >= 3
                 if tem_tendencia:
@@ -2425,20 +2424,20 @@ def render():
                         x=serie_dizimos["rotulo"],
                         y=tendencia,
                         mode="lines",
-                        line=dict(color="#CBD5E1", width=2, dash="dot"),
+                        line=dict(color="#475569", width=2, dash="dot"),
                         name="Tendencia",
                     ))
                 fig_dizimos.update_layout(**_layout_grafico(
                     altura=380,
                     margem=dict(t=25, b=40, l=20, r=20),
                     showlegend=False,
-                    xaxis=dict(fixedrange=True, gridcolor="#334155"),
-                    yaxis=dict(fixedrange=True, gridcolor="#334155", tickformat=",.0f"),
+                    xaxis=dict(fixedrange=True, gridcolor="#E2E8F0"),
+                    yaxis=dict(fixedrange=True, gridcolor="#E2E8F0", tickformat=",.0f"),
                 ))
                 st.plotly_chart(fig_dizimos, use_container_width=True, config=CONFIG_PLOTLY)
                 legenda_dizimos = [("Dizimos", CORES["dizimo"])]
                 if tem_tendencia:
-                    legenda_dizimos.append(("Tendencia (media movel 3 meses)", "#CBD5E1"))
+                    legenda_dizimos.append(("Tendencia (media movel 3 meses)", "#475569"))
                 _render_legenda(legenda_dizimos)
 
             _secao_dashboard(
@@ -2466,7 +2465,7 @@ def render():
                     marker_color=CORES["dizimo"],
                     text=[formatar_moeda(valor) for valor in ranking_membros["valor"]],
                     textposition="outside",
-                    textfont=dict(size=10, color="#CBD5E1"),
+                    textfont=dict(size=10, color="#475569"),
                 ))
                 fig_ranking.update_layout(**_layout_grafico(
                     altura=max(280, len(ranking_membros) * 40 + 80),
@@ -2502,7 +2501,7 @@ def render():
                     marker_color=CORES["funcao"],
                     text=[formatar_moeda(valor) for valor in resumo_funcoes["valor"]],
                     textposition="outside",
-                    textfont=dict(size=10, color="#CBD5E1"),
+                    textfont=dict(size=10, color="#475569"),
                 ))
                 fig_funcoes.update_layout(**_layout_grafico(
                     altura=320,
@@ -2588,14 +2587,14 @@ def render():
                     values=[qtd_periodo, nao_dizimistas],
                     hole=.7,
                     textinfo="none",
-                    marker=dict(colors=[CORES["entrada"], "#374151"], line=dict(color="#1E293B", width=2)),
+                    marker=dict(colors=[CORES["entrada"], "#E2E8F0"], line=dict(color="#FFFFFF", width=2)),
                 ))
                 fig_participacao.add_annotation(
                     text=f"<b>{percentual_periodo:.1f}%</b><br><span style='font-size:12px'>dizimistas</span>",
                     x=.5,
                     y=.5,
                     showarrow=False,
-                    font=dict(size=25, color="#F1F5F9"),
+                    font=dict(size=25, color="#10213A"),
                 )
                 fig_participacao.update_layout(**_layout_grafico(
                     altura=330,
@@ -2636,7 +2635,7 @@ def render():
                         marker_color=CORES["entrada"],
                         text=[str(quantidade) for quantidade in grafico_freq["Contribuicoes"]],
                         textposition="outside",
-                        textfont=dict(size=10, color="#CBD5E1"),
+                        textfont=dict(size=10, color="#475569"),
                     ))
                     fig_freq.update_layout(**_layout_grafico(
                         altura=max(340, len(grafico_freq) * 30 + 100),
@@ -2699,12 +2698,12 @@ def render():
                             marker_color=CORES["dizimo"],
                             text=[formatar_moeda(valor) for valor in mensal["valor"]],
                             textposition="outside",
-                            textfont=dict(size=10, color="#CBD5E1"),
+                            textfont=dict(size=10, color="#475569"),
                         ))
                         fig_membro.update_layout(**_layout_grafico(
                             altura=320,
-                            xaxis=dict(fixedrange=True, gridcolor="#334155"),
-                            yaxis=dict(fixedrange=True, gridcolor="#334155", tickformat=",.0f"),
+                            xaxis=dict(fixedrange=True, gridcolor="#E2E8F0"),
+                            yaxis=dict(fixedrange=True, gridcolor="#E2E8F0", tickformat=",.0f"),
                         ))
                         st.plotly_chart(fig_membro, use_container_width=True, config=CONFIG_PLOTLY)
                     st.caption("Presenca mensal das contribuicoes no periodo analisado")

@@ -128,7 +128,7 @@ def _css_base():
             min-height: 100vh;
             background: {CINZA_SUAVE};
             color: {CINZA_TEXTO};
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            font-family: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
         }}
 
         .fm-navbar-wrap {{
@@ -1370,7 +1370,7 @@ def _css_base():
             overflow-x: hidden;
             background: #FFFFFF;
             color: var(--fm-ink);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            font-family: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
         }}
 
         .fm-navbar-wrap {{
