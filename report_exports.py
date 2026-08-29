@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from utils.helpers import formatar_moeda as _moeda
+
 
 AZUL = "0B3A66"
 AZUL_CLARO = "EAF2FB"
@@ -18,13 +20,6 @@ def _texto(valor) -> str:
     if valor is None or pd.isna(valor):
         return ""
     return str(valor)
-
-
-def _moeda(valor) -> str:
-    try:
-        return f"R$ {float(valor):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-    except (TypeError, ValueError):
-        return "R$ 0,00"
 
 
 def _periodo_texto(periodo) -> str:
@@ -73,7 +68,7 @@ def gerar_excel_relatorio(
     ws["A1"] = "Prestacao de Contas"
     ws["A1"].font = titulo
     ws["A2"] = _texto(igreja.get("nome", "Igreja"))
-    ws["A2"].font = Font(size=13, bold=True, color=VERDE)
+    ws["A2"].font = Font(size=13, bold=True, color=AZUL)
     ws["A3"] = f"Periodo: {_periodo_texto(periodo)}"
     ws["A3"].font = subtitulo
     ws["A4"] = f"Gerado em: {datetime.datetime.now():%d/%m/%Y %H:%M}"
@@ -262,7 +257,7 @@ def gerar_pdf_relatorio(
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0B3A66")),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
         ("BACKGROUND", (0, 1), (-1, 1), colors.HexColor("#EAF2FB")),
-        ("TEXTCOLOR", (0, 1), (-1, 1), colors.HexColor("#0F6E56")),
+        ("TEXTCOLOR", (0, 1), (-1, 1), colors.HexColor("#0B3A66")),
         ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
         ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#D7E3F0")),
