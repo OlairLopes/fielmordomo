@@ -429,7 +429,7 @@ def _render_relatorios(slug):
 
 
 def render():
-    st.subheader("Reunião de Obreiros")
+    st.subheader("⛪ Reunião de Obreiros")
     slug = slug_da_sessao()
     if not slug:
         st.error("Sessao invalida. Faca login novamente.")

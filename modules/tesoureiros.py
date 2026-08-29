@@ -228,7 +228,7 @@ def render():
     if not slug:
         st.error("Sessao invalida. Faca login novamente.")
         return
-    st.subheader("Tesoureiros")
+    st.subheader("💼 Tesoureiros")
     if not solicitar_autorizacao(
         "gerenciar_tesoureiros",
         "gerenciar acessos de tesoureiros",

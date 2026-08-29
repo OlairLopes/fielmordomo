@@ -1302,7 +1302,7 @@ def _render_secretarias(slug):
 
 
 def render():
-    st.subheader("Círculo de Oração")
+    st.subheader("🙏 Círculo de Oração")
     st.caption("Gestão de matrículas, chamadas, visitantes, líderes e relatórios do ministério de oração.")
     slug = slug_da_sessao()
     if not slug:

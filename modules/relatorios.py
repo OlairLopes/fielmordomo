@@ -276,7 +276,7 @@ def render():
     igreja = st.session_state.get("igreja", {})
     if not isinstance(igreja, dict):
         igreja = {}
-    st.subheader("Relatorios")
+    st.subheader("📈 Relatórios")
 
     tab_financeiro, tab_leitura = st.tabs(["Financeiro", "Plano de Leitura"])
     with tab_financeiro:

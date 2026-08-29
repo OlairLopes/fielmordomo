@@ -1561,7 +1561,7 @@ def render():
     lote_itens_key = _sk("lote_itens", slug)
     lote_comprovante_key = _sk("lote_comprovante_html", slug)
 
-    st.subheader("💰 Lancamentos financeiros")
+    st.subheader("💰 Lançamentos financeiros")
 
     # ─── BOTAO PRINCIPAL: Novo lancamento ──────────────────────────
     if "mnl_aberto" not in st.session_state:

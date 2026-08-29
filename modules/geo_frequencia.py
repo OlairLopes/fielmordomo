@@ -2526,7 +2526,7 @@ def render():
 
     slug = slug_da_sessao()
 
-    st.title("📍 Monitoramento por Localizacao")
+    st.subheader("📍 Monitoramento por Localizacao")
     st.caption(
         "Controle de presenca por georreferenciamento usando o GPS do celular. "
         "Envio de mensagens automatizadas para presentes e ausentes."

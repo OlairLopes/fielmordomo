@@ -389,7 +389,7 @@ def _render_consulta(slug):
 
 
 def render():
-    st.subheader("Registro de Visitantes")
+    st.subheader("🤝 Registro de Visitantes")
     slug = slug_da_sessao()
     if not slug:
         st.error("Sessão inválida. Faça login novamente.")

@@ -1991,7 +1991,7 @@ def render():
 
     dizimo_mes, _, _ = _totais_dizimo(ref)
 
-    st.markdown("## Dashboard Financeiro")
+    st.markdown("## 📊 Dashboard Financeiro")
     st.caption("Visao executiva para decisao, conferencia e acompanhamento de tendencias.")
     dashboard_restrito = st.session_state.get("modo") == "pastor_auxiliar"
     if dashboard_restrito:

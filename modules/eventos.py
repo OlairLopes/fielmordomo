@@ -262,7 +262,7 @@ def _render_lista(slug):
 
 
 def render():
-    st.subheader("Agenda de Eventos")
+    st.subheader("📅 Agenda de Eventos")
     slug = slug_da_sessao()
     if not slug:
         st.error("Sessao invalida. Faca login novamente.")

@@ -199,7 +199,7 @@ def _render_controle_acessos(slug):
 
 
 def render():
-    st.subheader("Minha Conta")
+    st.subheader("👤 Minha Conta")
 
     slug = slug_da_sessao()
     igreja = st.session_state.get("igreja", {})

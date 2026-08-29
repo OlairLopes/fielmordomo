@@ -1115,7 +1115,7 @@ def modal_excluir_cadastro(slug, sel):
 
 def render():
     slug = slug_da_sessao()
-    st.subheader("Membros e fornecedores")
+    st.subheader("👥 Membros e fornecedores")
     df = _get(slug)
 
     igreja = st.session_state.get("igreja", {})

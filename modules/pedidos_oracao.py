@@ -543,7 +543,7 @@ def _render_agenda(slug):
 
 
 def render():
-    st.subheader("Pedidos de Oração")
+    st.subheader("🕊️ Pedidos de Oração")
     slug = slug_da_sessao()
     if not slug:
         st.error("Sessão inválida. Faça login novamente.")

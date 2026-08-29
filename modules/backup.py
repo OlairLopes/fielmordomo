@@ -163,7 +163,7 @@ def render():
         return
     igreja = st.session_state.get("igreja", {})
     plano = igreja.get("plano", "basico") if isinstance(igreja, dict) else "basico"
-    st.subheader("Backup de dados")
+    st.subheader("💾 Backup de dados")
     st.caption("Exporte ou restaure os dados isolados desta congregacao.")
     _render_resumo(slug)
     st.divider()

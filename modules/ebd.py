@@ -3055,7 +3055,7 @@ def _render_secretarios(slug):
 
 
 def render():
-    st.subheader("Escola Bíblica")
+    st.subheader("📚 Escola Bíblica")
     st.caption("Gestao de classes, chamada, frequencia e escala de professores da Escola Bíblica.")
     slug = slug_da_sessao()
     if not slug:
