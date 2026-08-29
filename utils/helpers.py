@@ -37,6 +37,29 @@ def formatar_moeda(valor) -> str:
         return "R$ 0,00"
 
 
+def formatar_percentual(valor) -> str:
+    try:
+        return f"{float(valor):.1f}%"
+    except Exception:
+        return "0.0%"
+
+
+def hoje() -> datetime.date:
+    return datetime.date.today()
+
+
+def inicio_mes() -> datetime.date:
+    return hoje().replace(day=1)
+
+
+def formatar_data(valor) -> str:
+    """Converte uma data ISO (aaaa-mm-dd) ou objeto date/datetime para dd/mm/aaaa."""
+    try:
+        return datetime.date.fromisoformat(str(valor)).strftime("%d/%m/%Y")
+    except Exception:
+        return str(valor or "")
+
+
 def preparar_df(df: pd.DataFrame) -> pd.DataFrame:
     v = df.copy()
     if "data" in v.columns:

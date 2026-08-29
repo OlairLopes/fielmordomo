@@ -30,7 +30,10 @@ from utils.helpers import (
     confirmar_exclusao,
     data_iso as _data_iso,
     filtrar_matriculas_validas_na_data as _filtrar_matriculas_validas_na_data,
+    formatar_data as _fmt_data,
     gerar_csv,
+    hoje as _hoje,
+    inicio_mes as _inicio_mes,
     normalizar_data_digitada,
     slug_da_sessao,
 )
@@ -44,19 +47,6 @@ TIPOS_CULTO_GFC = [
 ]
 
 
-def _hoje():
-    return datetime.date.today()
-
-
-def _inicio_mes():
-    return _hoje().replace(day=1)
-
-
-def _fmt_data(valor):
-    try:
-        return datetime.date.fromisoformat(str(valor)).strftime("%d/%m/%Y")
-    except Exception:
-        return str(valor or "")
 
 
 def _grupo_opcoes(grupos):

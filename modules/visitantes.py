@@ -1,4 +1,3 @@
-import datetime
 import json
 import urllib.request
 
@@ -11,7 +10,14 @@ from data.repository import (
     listar_visitantes_cultos,
     salvar_visitante_culto,
 )
-from utils.helpers import confirmar_exclusao, gerar_csv, slug_da_sessao
+from utils.helpers import (
+    confirmar_exclusao,
+    formatar_data as _fmt_data,
+    gerar_csv,
+    hoje as _hoje,
+    inicio_mes as _inicio_mes,
+    slug_da_sessao,
+)
 
 
 ESTADOS_BR = [
@@ -79,20 +85,6 @@ CONGREGACOES_VISITANTES = [
 ]
 
 
-def _hoje():
-    return datetime.date.today()
-
-
-def _inicio_mes():
-    hoje = _hoje()
-    return hoje.replace(day=1)
-
-
-def _fmt_data(valor):
-    try:
-        return datetime.date.fromisoformat(str(valor)).strftime("%d/%m/%Y")
-    except Exception:
-        return str(valor or "")
 
 
 def _sim_nao(valor):

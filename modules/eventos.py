@@ -9,7 +9,14 @@ from data.repository import (
     obter_evento_cartaz,
     salvar_evento_igreja,
 )
-from utils.helpers import confirmar_exclusao, gerar_csv, slug_da_sessao
+from utils.helpers import (
+    confirmar_exclusao,
+    formatar_data as _fmt_data,
+    gerar_csv,
+    hoje as _hoje,
+    inicio_mes as _inicio_mes,
+    slug_da_sessao,
+)
 
 
 VISIBILIDADES = ["Publico", "Membros", "Restrito"]
@@ -31,21 +38,6 @@ TIPOS_EVENTO = [
     "Outros",
     "Vigília",
 ]
-
-
-def _hoje():
-    return datetime.date.today()
-
-
-def _inicio_mes():
-    return _hoje().replace(day=1)
-
-
-def _fmt_data(valor):
-    try:
-        return datetime.date.fromisoformat(str(valor)).strftime("%d/%m/%Y")
-    except Exception:
-        return str(valor or "")
 
 
 def _parse_data(valor, padrao=None):

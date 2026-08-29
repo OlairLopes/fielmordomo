@@ -13,7 +13,15 @@ from data.repository import (
     relatorio_obreiros_frequencia,
     salvar_obreiros_chamada,
 )
-from utils.helpers import gerar_csv, slug_da_sessao
+from utils.helpers import (
+    formatar_data as _fmt_data,
+    formatar_moeda as _moeda,
+    formatar_percentual as _pct,
+    gerar_csv,
+    hoje as _hoje,
+    inicio_mes as _inicio_mes,
+    slug_da_sessao,
+)
 
 
 CORES = {
@@ -27,33 +35,6 @@ CORES = {
 CONFIG_PLOTLY = {"displayModeBar": False, "responsive": True}
 
 
-def _hoje():
-    return datetime.date.today()
-
-
-def _inicio_mes():
-    return _hoje().replace(day=1)
-
-
-def _fmt_data(valor):
-    try:
-        return datetime.date.fromisoformat(str(valor)).strftime("%d/%m/%Y")
-    except Exception:
-        return str(valor or "")
-
-
-def _pct(valor):
-    try:
-        return f"{float(valor):.1f}%"
-    except Exception:
-        return "0.0%"
-
-
-def _moeda(valor):
-    try:
-        return f"R$ {float(valor):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-    except Exception:
-        return "R$ 0,00"
 
 
 def _grafico_reunioes(reunioes):
