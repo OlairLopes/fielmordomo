@@ -685,7 +685,7 @@ def _botao_abrir_google_maps(url, texto="Abrir no Google Maps"):
     st.markdown(
         (
             f'<a href="{html.escape(str(url), quote=True)}" target="_blank" '
-            'style="display:inline-block;background:#0F6E56;color:white;'
+            'style="display:inline-block;background:#061B44;color:white;'
             'padding:9px 16px;border-radius:8px;text-decoration:none;'
             'font-size:0.9rem;font-weight:700;margin:4px 0 10px 0">'
             f'{html.escape(str(texto), quote=True)}</a>'
@@ -2314,7 +2314,7 @@ def _render_auto_checkin_via_link(slug, token):
     # Cabecalho minimalista
     st.markdown(
         """
-        <div style='text-align:center;padding:20px 0;background:linear-gradient(135deg,#0F6E56 0%,#10B981 100%);
+        <div style='text-align:center;padding:20px 0;background:linear-gradient(135deg,#061B44 0%,#0B3A66 100%);
                     border-radius:12px;color:white;margin-bottom:20px;'>
             <h1 style='margin:0;font-size:26px;'>📍 Registro de Presenca</h1>
             <p style='margin:6px 0 0;font-size:13px;opacity:0.9;'>Check-in automatico via GPS</p>

@@ -9,7 +9,8 @@ PLANOS = {
         "limite_membros": 50,
         "lancamento_lote": False,
         "backup_automatico": False,
-        "cor": "#6c757d",
+        "cor": "#64748B",
+        "cor_fim": "#475569",
     },
     "profissional": {
         "nome": "Profissional",
@@ -18,6 +19,7 @@ PLANOS = {
         "lancamento_lote": True,
         "backup_automatico": True,
         "cor": "#1D9E75",
+        "cor_fim": "#0F6E56",
     },
     "premium": {
         "nome": "Premium",
@@ -25,29 +27,8 @@ PLANOS = {
         "limite_membros": None,
         "lancamento_lote": True,
         "backup_automatico": True,
-        "cor": "#0F6E56",
-        "nome":              "Basico",
-        "preco":             "R$ 29,90/mes",
-        "limite_membros":    50,
-        "lancamento_lote":   False,
-        "backup_automatico": False,
-        "cor":               "#6c757d",
-    },
-    "profissional": {
-        "nome":              "Profissional",
-        "preco":             "R$ 59,90/mes",
-        "limite_membros":    250,
-        "lancamento_lote":   True,
-        "backup_automatico": True,
-        "cor":               "#1D9E75",
-    },
-    "premium": {
-        "nome":              "Premium",
-        "preco":             "R$ 90,90/mes",
-        "limite_membros":    None,
-        "lancamento_lote":   True,
-        "backup_automatico": True,
-        "cor":               "#0F6E56",
+        "cor": "#D4AF37",
+        "cor_fim": "#9C7317",
     },
 }
 
@@ -70,24 +51,6 @@ def pode_cadastrar_membro(plano, qtd_atual):
 def texto_limite(plano):
     limite = obter_plano(plano)["limite_membros"]
     return "ilimitado" if limite is None else str(limite)
-def obter_plano(slug_plano):
-    return PLANOS.get((slug_plano or "basico").lower(), PLANOS["basico"])
-
-
-def pode_cadastrar_membro(plano, qtd_atual):
-    p = obter_plano(plano)
-    limite = p["limite_membros"]
-    if limite is None:
-        return True
-    return qtd_atual < limite
-
-
-def texto_limite(plano):
-    p = obter_plano(plano)
-    limite = p["limite_membros"]
-    if limite is None:
-        return "ilimitado"
-    return str(limite)
 
 
 def tem_lancamento_lote(plano):
@@ -102,10 +65,4 @@ def proximo_plano(plano):
     slug = _slug_plano(plano)
     if slug == "basico":
         return "profissional"
-    return "premium"
-
-    if plano == "basico":
-        return "profissional"
-    if plano == "profissional":
-        return "premium"
     return "premium"

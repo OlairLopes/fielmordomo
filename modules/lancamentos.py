@@ -588,7 +588,7 @@ body {{ background: #f0f0f0; display: flex; justify-content: center; padding: 20
 
 <div style="text-align:center;margin-bottom:12px">
   <button class="btn-imprimir" onclick="window.print()"
-    style="background:#0F6E56;color:white;border:none;padding:8px 24px;
+    style="background:#061B44;color:white;border:none;padding:8px 24px;
            border-radius:6px;font-size:13px;cursor:pointer;font-weight:600">
     Imprimir cupom
   </button>
@@ -698,7 +698,7 @@ body {{ background: #f0f0f0; display: flex; justify-content: center; padding: 20
 
 <div style="text-align:center;margin-bottom:12px">
   <button class="btn-imprimir" onclick="window.print()"
-    style="background:#0F6E56;color:white;border:none;padding:8px 24px;
+    style="background:#061B44;color:white;border:none;padding:8px 24px;
            border-radius:6px;font-size:13px;cursor:pointer;font-weight:600">
     Imprimir cupom
   </button>
@@ -931,7 +931,7 @@ body {{ background: #f0f0f0; display: flex; justify-content: center; padding: 20
 
 <div style="text-align:center;margin-bottom:12px">
   <button class="btn-imprimir" onclick="window.print()"
-    style="background:#0F6E56;color:white;border:none;padding:8px 24px;
+    style="background:#061B44;color:white;border:none;padding:8px 24px;
            border-radius:6px;font-size:13px;cursor:pointer;font-weight:600">
     Imprimir 2a via
   </button>

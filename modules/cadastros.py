@@ -296,7 +296,7 @@ def _gerar_html_formulario_membro(row, igreja):
 * {{ box-sizing: border-box; }}
 body {{ margin: 0; padding: 18px; background: #f3f4f6; color: #111827; font-family: Arial, Helvetica, sans-serif; }}
 .toolbar {{ text-align: center; margin-bottom: 14px; }}
-.toolbar button {{ background: #0F6E56; color: white; border: 0; border-radius: 8px; padding: 10px 22px; font-size: 14px; font-weight: 700; cursor: pointer; }}
+.toolbar button {{ background: #061B44; color: white; border: 0; border-radius: 8px; padding: 10px 22px; font-size: 14px; font-weight: 700; cursor: pointer; }}
 .folha {{ width: 210mm; min-height: 297mm; margin: 0 auto; background: white; padding: 16mm; border: 1px solid #d1d5db; }}
 .cabecalho {{ text-align: center; border-bottom: 2px solid #111827; padding-bottom: 10px; margin-bottom: 16px; }}
 .igreja {{ font-size: 18px; font-weight: 800; text-transform: uppercase; }}
@@ -876,7 +876,7 @@ def modal_visualizar_cadastro(sel, igreja):
             link_maps = "https://www.google.com/maps/search/?api=1&query=" + urllib.parse.quote_plus(endereco_completo)
             st.markdown(
                 f'<a href="{link_maps}" target="_blank" '
-                f'style="display:inline-block;background:#0F6E56;color:white;'
+                f'style="display:inline-block;background:#061B44;color:white;'
                 f'padding:8px 18px;border-radius:6px;text-decoration:none;'
                 f'font-weight:600;margin-top:8px;">'
                 f'🗺️ Abrir no Google Maps</a>',

@@ -64,8 +64,8 @@ def render():
                     justify-content:center;padding:40px 20px 30px 20px">
             <img src="{img_src}"
                  style="max-width:260px;max-height:200px;object-fit:contain;
-                        filter:drop-shadow(0 4px 12px rgba(15,110,86,0.15))"/>
-            <h2 style="color:#0F6E56;margin:20px 0 4px 0;font-weight:700;
+                        filter:drop-shadow(0 4px 12px rgba(6,27,68,0.15))"/>
+            <h2 style="color:#061B44;margin:20px 0 4px 0;font-weight:700;
                        font-size:1.8rem;text-align:center">
                 {nome_igreja}
             </h2>
@@ -78,9 +78,9 @@ def render():
         st.markdown(f"""
         <div style="display:flex;flex-direction:column;align-items:center;
                     justify-content:center;padding:60px 20px 40px 20px">
-            <div style="font-size:3.5rem;font-weight:800;color:#0F6E56;
+            <div style="font-size:3.5rem;font-weight:800;color:#061B44;
                         letter-spacing:-1px">FielMordomo</div>
-            <h2 style="color:#0F6E56;margin:20px 0 4px 0;font-weight:700;
+            <h2 style="color:#061B44;margin:20px 0 4px 0;font-weight:700;
                        font-size:1.6rem;text-align:center">
                 {nome_igreja}
             </h2>
@@ -154,7 +154,7 @@ def render():
         )
 
     st.markdown(f"""
-    <h4 style="color:#0F6E56;margin:18px 0 12px 0">
+    <h4 style="color:#061B44;margin:18px 0 12px 0">
         📊 Resumo de {mes_ano}
     </h4>
     """, unsafe_allow_html=True)
@@ -214,18 +214,21 @@ def render():
         """, unsafe_allow_html=True)
 
     # ── Card do plano ─────────────────────────────────────────────────────
-    cor_plano = str(p_info.get("cor", "#0F6E56"))
+    cor_plano = str(p_info.get("cor", "#061B44"))
     if not COR_HEX_RE.fullmatch(cor_plano):
-        cor_plano = "#0F6E56"
+        cor_plano = "#061B44"
+    cor_plano_fim = str(p_info.get("cor_fim", cor_plano))
+    if not COR_HEX_RE.fullmatch(cor_plano_fim):
+        cor_plano_fim = cor_plano
     nome_plano = _html(p_info.get("nome", "Basico"))
     preco_plano = _html(p_info.get("preco", ""))
     lim_txt = _html(lim_txt)
 
     st.markdown("")
     st.markdown(f"""
-    <div style="background:linear-gradient(135deg,{cor_plano} 0%,#0F6E56 100%);
+    <div style="background:linear-gradient(135deg,{cor_plano} 0%,{cor_plano_fim} 100%);
                 border-radius:14px;padding:22px 26px;color:white;margin-top:14px;
-                box-shadow:0 4px 14px rgba(15,110,86,0.25)">
+                box-shadow:0 4px 14px rgba(6,27,68,0.25)">
         <div style="display:flex;justify-content:space-between;align-items:center;
                     flex-wrap:wrap;gap:10px">
             <div>

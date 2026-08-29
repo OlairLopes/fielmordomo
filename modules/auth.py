@@ -579,10 +579,10 @@ def _mostrar_recuperacao_senha():
         )
         st.markdown(
             f'<a href="{link_email}" '
-            f'style="display:inline-block;background:#0F6E56;color:white;'
+            f'style="display:inline-block;background:#061B44;color:white;'
             f'padding:10px 20px;border-radius:8px;text-decoration:none;'
             f'font-weight:600;margin:4px 4px 4px 0">'
-            f'ðŸ“§ Enviar e-mail ao administrador</a>',
+            f'📧 Enviar e-mail ao administrador</a>',
             unsafe_allow_html=True,
         )
         st.caption(f"E-mail: **{email_admin}**")
@@ -598,7 +598,7 @@ def _mostrar_recuperacao_senha():
             f'style="display:inline-block;background:#25D366;color:white;'
             f'padding:10px 20px;border-radius:8px;text-decoration:none;'
             f'font-weight:600;margin:4px 4px 4px 0">'
-            f'ðŸ’¬ Falar pelo WhatsApp</a>',
+            f'💬 Falar pelo WhatsApp</a>',
             unsafe_allow_html=True,
         )
         st.caption(f"WhatsApp: **{formatar_telefone(wpp_admin)}**")

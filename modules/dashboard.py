@@ -1832,7 +1832,7 @@ th {{ background:#F1F5F9;color:#1E293B;text-align:left;padding:8px;border-bottom
 td {{ padding:6px 8px;border-bottom:1px solid #F1F5F9;color:#334155; }}
 .rodape {{ text-align:center;color:#64748B;font-size:10px;margin-top:22px;
     padding-top:14px;border-top:1px solid #E2E8F0; }}
-.btn-imprimir {{ background:#0F6E56;color:white;border:none;padding:10px 24px;
+.btn-imprimir {{ background:#061B44;color:white;border:none;padding:10px 24px;
     border-radius:6px;font-size:13px;cursor:pointer;font-weight:600; }}
 @media print {{
     body {{ background:white;padding:0; }}
