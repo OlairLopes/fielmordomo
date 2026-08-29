@@ -2072,13 +2072,6 @@ def render():
     ])
 
     with tab_visao:
-        # ═══ NOVO: Ticket medio, potencial e gap ═══
-        _secao_dashboard(
-            "Ticket medio e potencial de arrecadacao",
-            "Analise do valor medio por dizimista e do potencial de arrecadacao vs realizado.",
-        )
-        _render_ticket_medio_gap(ticket_info)
-
         _secao_dashboard(
             "Evolucao financeira",
             "Entradas, saidas e saldo acumulado mes a mes desde janeiro/2026.",
@@ -2278,6 +2271,12 @@ def render():
         with a1: _card("Entradas YTD", formatar_moeda(ent_ytd), f"{_variacao(ent_ytd, ent_ytd_ant)} vs mesmo periodo anterior")
         with a2: _card("Saidas YTD", formatar_moeda(sai_ytd))
         with a3: _card("Saldo YTD", formatar_moeda(saldo_ytd))
+
+        _secao_dashboard(
+            "Ticket medio e potencial de arrecadacao",
+            "Analise do valor medio por dizimista e do potencial de arrecadacao vs realizado.",
+        )
+        _render_ticket_medio_gap(ticket_info)
 
         if _autorizacao_pastoral(slug):
             # ═══ Saude financeira (transferido da antiga aba Saude Financeira) ═══
