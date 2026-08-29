@@ -705,204 +705,126 @@ def _sidebar_admin():
             _auth().logout()
 
 
-def _sidebar_tesoureiro(pagina_atual, igreja, tesoureiro):
+def _sidebar_perfil_simples(
+    pagina_atual, igreja, usuario, *,
+    tipo_login, paginas_base, pagina_inicio,
+    nome_padrao, subtitulo, key_prefix,
+):
+    """Sidebar padrao para perfis com lista plana de paginas (sem grupos):
+    tesoureiro, secretarios de ministerio, pastor auxiliar e recepcao."""
     with st.sidebar:
         _render_logo_sidebar(igreja.get("slug", ""))
         st.markdown(
             '<div class="sidebar-info">'
-            f'<b>{_esc(tesoureiro.get("nome", "Tesoureiro"))}</b>'
-            '<div class="plano">Acesso restrito operacional</div>'
+            f'<b>{_esc(usuario.get("nome", nome_padrao))}</b>'
+            f'<div class="plano">{_esc(subtitulo)}</div>'
             "</div>",
             unsafe_allow_html=True,
         )
-        paginas = _paginas_com_permissoes(PAGINAS_TESOUREIRO, "tesoureiro", tesoureiro)
-        _botao_inicio_sidebar("sb_inicio_tesoureiro", "lancamentos")
+        paginas = _paginas_com_permissoes(paginas_base, tipo_login, usuario)
+        _botao_inicio_sidebar(f"{key_prefix}_inicio", pagina_inicio)
         for chave, (rotulo, _) in _paginas_ordenadas(paginas):
-            if chave == "lancamentos":
+            if chave == pagina_inicio:
                 continue
             if st.button(
                 _rotulo_menu(chave, rotulo),
-                key=f"sb_tesoureiro_{chave}",
+                key=f"{key_prefix}_{chave}",
                 use_container_width=True,
                 type="primary" if pagina_atual == chave else "secondary",
             ):
                 st.session_state["pagina"] = chave
                 st.rerun()
         st.divider()
-        if st.button("🚪  Sair", key="sb_sair_tesoureiro", use_container_width=True):
+        if st.button("🚪  Sair", key=f"{key_prefix}_sair", use_container_width=True):
             _auth().logout()
+
+
+def _sidebar_tesoureiro(pagina_atual, igreja, tesoureiro):
+    _sidebar_perfil_simples(
+        pagina_atual, igreja, tesoureiro,
+        tipo_login="tesoureiro",
+        paginas_base=PAGINAS_TESOUREIRO,
+        pagina_inicio="lancamentos",
+        nome_padrao="Tesoureiro",
+        subtitulo="Acesso restrito operacional",
+        key_prefix="sb_tesoureiro",
+    )
 
 
 def _sidebar_secretario_ebd(pagina_atual, igreja, secretario):
     perfil = "Secretário geral" if secretario.get("perfil") == "geral" else "Secretário de classe"
     classe = secretario.get("classe") or "Escola Bíblica"
-    with st.sidebar:
-        _render_logo_sidebar(igreja.get("slug", ""))
-        st.markdown(
-            '<div class="sidebar-info">'
-            f'<b>{_esc(secretario.get("nome", "Secretário Escola Bíblica"))}</b>'
-            f'<div class="plano">{_esc(perfil)} - {_esc(classe)}</div>'
-            "</div>",
-            unsafe_allow_html=True,
-        )
-        paginas_extras = _paginas_com_permissoes(PAGINAS_EBD, "secretario_ebd", secretario)
-        _botao_inicio_sidebar("sb_inicio_secretario_ebd", "ebd")
-        for chave, (rotulo, _) in _paginas_ordenadas(paginas_extras):
-            if chave == "ebd":
-                continue
-            if st.button(
-                _rotulo_menu(chave, rotulo),
-                key=f"sb_secretario_ebd_{chave}",
-                use_container_width=True,
-                type="primary" if pagina_atual == chave else "secondary",
-            ):
-                st.session_state["pagina"] = chave
-                st.rerun()
-        st.divider()
-        if st.button("🚪  Sair", key="sb_sair_secretario_ebd", use_container_width=True):
-            _auth().logout()
+    _sidebar_perfil_simples(
+        pagina_atual, igreja, secretario,
+        tipo_login="secretario_ebd",
+        paginas_base=PAGINAS_EBD,
+        pagina_inicio="ebd",
+        nome_padrao="Secretário Escola Bíblica",
+        subtitulo=f"{perfil} - {classe}",
+        key_prefix="sb_secretario_ebd",
+    )
 
 
 def _sidebar_secretaria_orhafe(pagina_atual, igreja, secretaria):
     perfil = "Secretaria geral" if secretaria.get("perfil") == "geral" else "Secretaria de chamada"
-    with st.sidebar:
-        _render_logo_sidebar(igreja.get("slug", ""))
-        st.markdown(
-            '<div class="sidebar-info">'
-            f'<b>{_esc(secretaria.get("nome", "Secretaria Círculo de Oração"))}</b>'
-            f'<div class="plano">{_esc(perfil)} - Círculo de Oração</div>'
-            "</div>",
-            unsafe_allow_html=True,
-        )
-        paginas_extras = _paginas_com_permissoes({"orhafe": PAGINAS_IGREJA["orhafe"]}, "secretaria_orhafe", secretaria)
-        _botao_inicio_sidebar("sb_inicio_secretaria_orhafe", "orhafe")
-        for chave, (rotulo, _) in _paginas_ordenadas(paginas_extras):
-            if chave == "orhafe":
-                continue
-            if st.button(
-                _rotulo_menu(chave, rotulo),
-                key=f"sb_secretaria_orhafe_{chave}",
-                use_container_width=True,
-                type="primary" if pagina_atual == chave else "secondary",
-            ):
-                st.session_state["pagina"] = chave
-                st.rerun()
-        st.divider()
-        if st.button("🚪  Sair", key="sb_sair_secretaria_orhafe", use_container_width=True):
-            _auth().logout()
+    _sidebar_perfil_simples(
+        pagina_atual, igreja, secretaria,
+        tipo_login="secretaria_orhafe",
+        paginas_base={"orhafe": PAGINAS_IGREJA["orhafe"]},
+        pagina_inicio="orhafe",
+        nome_padrao="Secretaria Círculo de Oração",
+        subtitulo=f"{perfil} - Círculo de Oração",
+        key_prefix="sb_secretaria_orhafe",
+    )
 
 
 def _sidebar_secretaria_gfc(pagina_atual, igreja, secretaria):
     perfil = "Secretaria geral" if secretaria.get("perfil") == "geral" else "Secretaria de chamada"
-    with st.sidebar:
-        _render_logo_sidebar(igreja.get("slug", ""))
-        st.markdown(
-            '<div class="sidebar-info">'
-            f'<b>{_esc(secretaria.get("nome", "Secretaria de Grupos Familiares"))}</b>'
-            f'<div class="plano">{_esc(perfil)} - Grupos Familiares</div>'
-            "</div>",
-            unsafe_allow_html=True,
-        )
-        paginas_extras = _paginas_com_permissoes({"gfc": PAGINAS_IGREJA["gfc"]}, "secretaria_gfc", secretaria)
-        _botao_inicio_sidebar("sb_inicio_secretaria_gfc", "gfc")
-        for chave, (rotulo, _) in _paginas_ordenadas(paginas_extras):
-            if chave == "gfc":
-                continue
-            if st.button(
-                _rotulo_menu(chave, rotulo),
-                key=f"sb_secretaria_gfc_{chave}",
-                use_container_width=True,
-                type="primary" if pagina_atual == chave else "secondary",
-            ):
-                st.session_state["pagina"] = chave
-                st.rerun()
-        st.divider()
-        if st.button("🚪  Sair", key="sb_sair_secretaria_gfc", use_container_width=True):
-            _auth().logout()
+    _sidebar_perfil_simples(
+        pagina_atual, igreja, secretaria,
+        tipo_login="secretaria_gfc",
+        paginas_base={"gfc": PAGINAS_IGREJA["gfc"]},
+        pagina_inicio="gfc",
+        nome_padrao="Secretaria de Grupos Familiares",
+        subtitulo=f"{perfil} - Grupos Familiares",
+        key_prefix="sb_secretaria_gfc",
+    )
 
 
 def _sidebar_pastor_auxiliar(pagina_atual, igreja, pastor):
-    with st.sidebar:
-        _render_logo_sidebar(igreja.get("slug", ""))
-        st.markdown(
-            '<div class="sidebar-info">'
-            f'<b>{_esc(pastor.get("nome", "Pastor Auxiliar"))}</b>'
-            '<div class="plano">Acesso restrito pastoral</div>'
-            "</div>",
-            unsafe_allow_html=True,
-        )
-        paginas = _paginas_com_permissoes(PAGINAS_PASTOR_AUXILIAR, "pastor_auxiliar", pastor)
-        _botao_inicio_sidebar("sb_inicio_pastor_auxiliar", "visitantes")
-        for chave, (rotulo, _) in _paginas_ordenadas(paginas):
-            if chave == "visitantes":
-                continue
-            if st.button(
-                _rotulo_menu(chave, rotulo),
-                key=f"sb_pastor_auxiliar_{chave}",
-                use_container_width=True,
-                type="primary" if pagina_atual == chave else "secondary",
-            ):
-                st.session_state["pagina"] = chave
-                st.rerun()
-        st.divider()
-        if st.button("🚪  Sair", key="sb_sair_pastor_auxiliar", use_container_width=True):
-            _auth().logout()
+    _sidebar_perfil_simples(
+        pagina_atual, igreja, pastor,
+        tipo_login="pastor_auxiliar",
+        paginas_base=PAGINAS_PASTOR_AUXILIAR,
+        pagina_inicio="visitantes",
+        nome_padrao="Pastor Auxiliar",
+        subtitulo="Acesso restrito pastoral",
+        key_prefix="sb_pastor_auxiliar",
+    )
 
 
 def _sidebar_recepcao(pagina_atual, igreja, recepcao):
-    with st.sidebar:
-        _render_logo_sidebar(igreja.get("slug", ""))
-        st.markdown(
-            '<div class="sidebar-info">'
-            f'<b>{_esc(recepcao.get("nome", "Recepção"))}</b>'
-            '<div class="plano">Acesso restrito a visitantes</div>'
-            "</div>",
-            unsafe_allow_html=True,
-        )
-        paginas = _paginas_com_permissoes(PAGINAS_RECEPCAO, "recepcao", recepcao)
-        _botao_inicio_sidebar("sb_inicio_recepcao", "visitantes")
-        for chave, (rotulo, _) in _paginas_ordenadas(paginas):
-            if chave == "visitantes":
-                continue
-            if st.button(
-                _rotulo_menu(chave, rotulo),
-                key=f"sb_recepcao_{chave}",
-                use_container_width=True,
-                type="primary" if pagina_atual == chave else "secondary",
-            ):
-                st.session_state["pagina"] = chave
-                st.rerun()
-        st.divider()
-        if st.button("🚪  Sair", key="sb_sair_recepcao", use_container_width=True):
-            _auth().logout()
+    _sidebar_perfil_simples(
+        pagina_atual, igreja, recepcao,
+        tipo_login="recepcao",
+        paginas_base=PAGINAS_RECEPCAO,
+        pagina_inicio="visitantes",
+        nome_padrao="Recepção",
+        subtitulo="Acesso restrito a visitantes",
+        key_prefix="sb_recepcao",
+    )
 
 
 def _sidebar_secretario_geral(pagina_atual, igreja, secretario):
-    with st.sidebar:
-        _render_logo_sidebar(igreja.get("slug", ""))
-        st.markdown(
-            '<div class="sidebar-info">'
-            f'<b>{_esc(secretario.get("nome", "Secretário Geral"))}</b>'
-            '<div class="plano">Acesso restrito de secretaria</div>'
-            "</div>",
-            unsafe_allow_html=True,
-        )
-        paginas = _paginas_com_permissoes(PAGINAS_SECRETARIO_GERAL, "secretario_geral", secretario)
-        _botao_inicio_sidebar("sb_inicio_secretario_geral", "cadastros")
-        for chave, (rotulo, _) in _paginas_ordenadas(paginas):
-            if chave == "cadastros":
-                continue
-            if st.button(
-                _rotulo_menu(chave, rotulo),
-                key=f"sb_secretario_geral_{chave}",
-                use_container_width=True,
-                type="primary" if pagina_atual == chave else "secondary",
-            ):
-                st.session_state["pagina"] = chave
-                st.rerun()
-        st.divider()
-        if st.button("🚪  Sair", key="sb_sair_secretario_geral", use_container_width=True):
-            _auth().logout()
+    _sidebar_perfil_simples(
+        pagina_atual, igreja, secretario,
+        tipo_login="secretario_geral",
+        paginas_base=PAGINAS_SECRETARIO_GERAL,
+        pagina_inicio="cadastros",
+        nome_padrao="Secretário Geral",
+        subtitulo="Acesso restrito de secretaria",
+        key_prefix="sb_secretario_geral",
+    )
 
 
 def _renderizar_admin():
