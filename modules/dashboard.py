@@ -2041,9 +2041,6 @@ def render():
 
     _legenda_cores()
 
-    # ═══ NOVO: Insight textual automatico ═══
-    _render_insight_topo(insight_texto)
-
     # ═══ KPIs principais com COMPARATIVO ANO ANTERIOR ═══
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -2266,6 +2263,8 @@ def render():
             "Area restrita. Exibe dados individuais de contribuicao. "
             "Acesse somente quando necessario e nao compartilhe exportacoes sem autorizacao."
         )
+
+        _render_insight_topo(insight_texto)
 
         a1, a2, a3 = st.columns(3)
         with a1: _card("Entradas YTD", formatar_moeda(ent_ytd), f"{_variacao(ent_ytd, ent_ytd_ant)} vs mesmo periodo anterior")
