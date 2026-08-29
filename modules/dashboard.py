@@ -154,15 +154,20 @@ def _comparativo_ytd(df, ano, ate_mes):
     return _totais(atual), _totais(anterior)
 
 
-def _serie_mensal(df, fim_mes, quantidade=12):
+def _serie_mensal(df, fim_mes, quantidade=12, inicio_minimo=None):
+    colunas_vazias = ["mes", "rotulo", "entradas", "saidas", "saldo"]
     meses_com_dados = df.loc[
         df["mes_periodo"].notna() & (df["mes_periodo"] <= fim_mes),
         "mes_periodo",
     ]
     if meses_com_dados.empty:
-        return pd.DataFrame(columns=["mes", "rotulo", "entradas", "saidas", "saldo"])
+        return pd.DataFrame(columns=colunas_vazias)
 
     inicio_mes = max(meses_com_dados.min(), fim_mes - (quantidade - 1))
+    if inicio_minimo is not None:
+        inicio_mes = max(inicio_mes, inicio_minimo)
+    if inicio_mes > fim_mes:
+        return pd.DataFrame(columns=colunas_vazias)
     meses = [inicio_mes + i for i in range((fim_mes - inicio_mes).n + 1)]
     linhas = []
     for mes in meses:
@@ -2063,9 +2068,9 @@ def render():
 
         _secao_dashboard(
             "Evolucao financeira",
-            "Entradas, saidas e saldo acumulado mes a mes nos ultimos 12 meses.",
+            "Entradas, saidas e saldo acumulado mes a mes desde janeiro/2026.",
         )
-        serie = _serie_mensal(df, mes_ref)
+        serie = _serie_mensal(df, mes_ref, inicio_minimo=pd.Period("2026-01", freq="M"))
         # Posicoes alternadas (acima/abaixo) para o texto do saldo, reduzindo
         # sobreposicao com os rotulos das barras de entradas/saidas.
         posicoes_saldo = [
