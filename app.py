@@ -859,179 +859,111 @@ def _renderizar_igreja():
         )
 
 
-def _renderizar_tesoureiro():
+def _renderizar_perfil_simples(
+    session_key, *, tipo_login, paginas_base, pagina_padrao,
+    sidebar_func, contexto_log,
+):
+    """Renderizacao padrao para perfis com lista plana de paginas (sem grupos):
+    tesoureiro, secretarios de ministerio, pastor auxiliar e recepcao."""
     igreja = st.session_state.get("igreja", {})
-    tesoureiro = st.session_state.get("tesoureiro", {})
-    if not isinstance(igreja, dict) or not igreja.get("slug") or not isinstance(tesoureiro, dict):
+    usuario = st.session_state.get(session_key, {})
+    if not isinstance(igreja, dict) or not igreja.get("slug") or not isinstance(usuario, dict):
         st.error("Sessão inválida. Faça login novamente.")
         if st.button("Voltar ao login"):
             _auth().logout()
         return
-    paginas = _paginas_com_permissoes(PAGINAS_TESOUREIRO, "tesoureiro", tesoureiro)
-    pagina = st.session_state.get("pagina", "lancamentos")
+    paginas = _paginas_com_permissoes(paginas_base, tipo_login, usuario)
+    pagina = st.session_state.get("pagina", pagina_padrao)
     if pagina not in paginas:
-        pagina = "lancamentos"
+        pagina = pagina_padrao
         st.session_state["pagina"] = pagina
-    _sidebar_tesoureiro(pagina, igreja, tesoureiro)
+    sidebar_func(pagina, igreja, usuario)
     _, caminho_modulo = paginas[pagina]
     try:
         _importar(caminho_modulo).render()
     except Exception as ex:
-        LOGGER.exception("Falha ao carregar a página %s para o tesoureiro.", pagina)
+        LOGGER.exception("Falha ao carregar a página %s para %s.", pagina, contexto_log)
         st.error(
             "Não foi possível carregar esta página. "
             f"Tipo do erro: {type(ex).__name__}. Consulte o log do sistema."
         )
+
+
+def _renderizar_tesoureiro():
+    _renderizar_perfil_simples(
+        "tesoureiro",
+        tipo_login="tesoureiro",
+        paginas_base=PAGINAS_TESOUREIRO,
+        pagina_padrao="lancamentos",
+        sidebar_func=_sidebar_tesoureiro,
+        contexto_log="o tesoureiro",
+    )
 
 
 def _renderizar_secretario_ebd():
-    igreja = st.session_state.get("igreja", {})
-    secretario = st.session_state.get("secretario_ebd", {})
-    if not isinstance(igreja, dict) or not igreja.get("slug") or not isinstance(secretario, dict):
-        st.error("Sessão inválida. Faça login novamente.")
-        if st.button("Voltar ao login"):
-            _auth().logout()
-        return
-    paginas = _paginas_com_permissoes(PAGINAS_EBD, "secretario_ebd", secretario)
-    pagina = st.session_state.get("pagina", "ebd")
-    if pagina not in paginas:
-        pagina = "ebd"
-        st.session_state["pagina"] = pagina
-    _sidebar_secretario_ebd(pagina, igreja, secretario)
-    _, caminho_modulo = paginas[pagina]
-    try:
-        _importar(caminho_modulo).render()
-    except Exception as ex:
-        LOGGER.exception("Falha ao carregar Escola Bíblica para secretario.")
-        st.error(
-            "Não foi possível carregar esta página. "
-            f"Tipo do erro: {type(ex).__name__}. Consulte o log do sistema."
-        )
+    _renderizar_perfil_simples(
+        "secretario_ebd",
+        tipo_login="secretario_ebd",
+        paginas_base=PAGINAS_EBD,
+        pagina_padrao="ebd",
+        sidebar_func=_sidebar_secretario_ebd,
+        contexto_log="o secretário da Escola Bíblica",
+    )
 
 
 def _renderizar_secretaria_orhafe():
-    igreja = st.session_state.get("igreja", {})
-    secretaria = st.session_state.get("secretaria_orhafe", {})
-    if not isinstance(igreja, dict) or not igreja.get("slug") or not isinstance(secretaria, dict):
-        st.error("Sessão inválida. Faça login novamente.")
-        if st.button("Voltar ao login"):
-            _auth().logout()
-        return
-    paginas = _paginas_com_permissoes({"orhafe": PAGINAS_IGREJA["orhafe"]}, "secretaria_orhafe", secretaria)
-    pagina = st.session_state.get("pagina", "orhafe")
-    if pagina not in paginas:
-        pagina = "orhafe"
-        st.session_state["pagina"] = pagina
-    _sidebar_secretaria_orhafe(pagina, igreja, secretaria)
-    _, caminho_modulo = paginas[pagina]
-    try:
-        _importar(caminho_modulo).render()
-    except Exception as ex:
-        LOGGER.exception("Falha ao carregar Círculo de Oração para secretaria.")
-        st.error(
-            "Não foi possível carregar esta página. "
-            f"Tipo do erro: {type(ex).__name__}. Consulte o log do sistema."
-        )
+    _renderizar_perfil_simples(
+        "secretaria_orhafe",
+        tipo_login="secretaria_orhafe",
+        paginas_base={"orhafe": PAGINAS_IGREJA["orhafe"]},
+        pagina_padrao="orhafe",
+        sidebar_func=_sidebar_secretaria_orhafe,
+        contexto_log="a secretaria do Círculo de Oração",
+    )
 
 
 def _renderizar_secretaria_gfc():
-    igreja = st.session_state.get("igreja", {})
-    secretaria = st.session_state.get("secretaria_gfc", {})
-    if not isinstance(igreja, dict) or not igreja.get("slug") or not isinstance(secretaria, dict):
-        st.error("Sessao invalida. Faca login novamente.")
-        if st.button("Voltar ao login"):
-            _auth().logout()
-        return
-    paginas = _paginas_com_permissoes({"gfc": PAGINAS_IGREJA["gfc"]}, "secretaria_gfc", secretaria)
-    pagina = st.session_state.get("pagina", "gfc")
-    if pagina not in paginas:
-        pagina = "gfc"
-        st.session_state["pagina"] = pagina
-    _sidebar_secretaria_gfc(pagina, igreja, secretaria)
-    _, caminho_modulo = paginas[pagina]
-    try:
-        _importar(caminho_modulo).render()
-    except Exception as ex:
-        LOGGER.exception("Falha ao carregar Grupos Familiares para secretaria.")
-        st.error(
-            "Nao foi possivel carregar esta pagina. "
-            f"Tipo do erro: {type(ex).__name__}. Consulte o log do sistema."
-        )
+    _renderizar_perfil_simples(
+        "secretaria_gfc",
+        tipo_login="secretaria_gfc",
+        paginas_base={"gfc": PAGINAS_IGREJA["gfc"]},
+        pagina_padrao="gfc",
+        sidebar_func=_sidebar_secretaria_gfc,
+        contexto_log="a secretaria de Grupos Familiares",
+    )
 
 
 def _renderizar_pastor_auxiliar():
-    igreja = st.session_state.get("igreja", {})
-    pastor = st.session_state.get("pastor_auxiliar", {})
-    if not isinstance(igreja, dict) or not igreja.get("slug") or not isinstance(pastor, dict):
-        st.error("Sessão inválida. Faça login novamente.")
-        if st.button("Voltar ao login"):
-            _auth().logout()
-        return
-    paginas = _paginas_com_permissoes(PAGINAS_PASTOR_AUXILIAR, "pastor_auxiliar", pastor)
-    pagina = st.session_state.get("pagina", "visitantes")
-    if pagina not in paginas:
-        pagina = "visitantes"
-        st.session_state["pagina"] = pagina
-    _sidebar_pastor_auxiliar(pagina, igreja, pastor)
-    _, caminho_modulo = paginas[pagina]
-    try:
-        _importar(caminho_modulo).render()
-    except Exception as ex:
-        LOGGER.exception("Falha ao carregar a página %s para pastor auxiliar.", pagina)
-        st.error(
-            "Não foi possível carregar esta página. "
-            f"Tipo do erro: {type(ex).__name__}. Consulte o log do sistema."
-        )
+    _renderizar_perfil_simples(
+        "pastor_auxiliar",
+        tipo_login="pastor_auxiliar",
+        paginas_base=PAGINAS_PASTOR_AUXILIAR,
+        pagina_padrao="visitantes",
+        sidebar_func=_sidebar_pastor_auxiliar,
+        contexto_log="o pastor auxiliar",
+    )
 
 
 def _renderizar_recepcao():
-    igreja = st.session_state.get("igreja", {})
-    recepcao = st.session_state.get("recepcao", {})
-    if not isinstance(igreja, dict) or not igreja.get("slug") or not isinstance(recepcao, dict):
-        st.error("Sessão inválida. Faça login novamente.")
-        if st.button("Voltar ao login"):
-            _auth().logout()
-        return
-    paginas = _paginas_com_permissoes(PAGINAS_RECEPCAO, "recepcao", recepcao)
-    pagina = st.session_state.get("pagina", "visitantes")
-    if pagina not in paginas:
-        pagina = "visitantes"
-        st.session_state["pagina"] = pagina
-    _sidebar_recepcao(pagina, igreja, recepcao)
-    try:
-        _, caminho_modulo = paginas[pagina]
-        _importar(caminho_modulo).render()
-    except Exception as ex:
-        LOGGER.exception("Falha ao carregar visitantes para recepção.")
-        st.error(
-            "Não foi possível carregar esta página. "
-            f"Tipo do erro: {type(ex).__name__}. Consulte o log do sistema."
-        )
+    _renderizar_perfil_simples(
+        "recepcao",
+        tipo_login="recepcao",
+        paginas_base=PAGINAS_RECEPCAO,
+        pagina_padrao="visitantes",
+        sidebar_func=_sidebar_recepcao,
+        contexto_log="a recepção",
+    )
 
 
 def _renderizar_secretario_geral():
-    igreja = st.session_state.get("igreja", {})
-    secretario = st.session_state.get("secretario_geral", {})
-    if not isinstance(igreja, dict) or not igreja.get("slug") or not isinstance(secretario, dict):
-        st.error("Sessão inválida. Faça login novamente.")
-        if st.button("Voltar ao login"):
-            _auth().logout()
-        return
-    paginas = _paginas_com_permissoes(PAGINAS_SECRETARIO_GERAL, "secretario_geral", secretario)
-    pagina = st.session_state.get("pagina", "cadastros")
-    if pagina not in paginas:
-        pagina = "cadastros"
-        st.session_state["pagina"] = pagina
-    _sidebar_secretario_geral(pagina, igreja, secretario)
-    _, caminho_modulo = paginas[pagina]
-    try:
-        _importar(caminho_modulo).render()
-    except Exception as ex:
-        LOGGER.exception("Falha ao carregar a página %s para secretário geral.", pagina)
-        st.error(
-            "Não foi possível carregar esta página. "
-            f"Tipo do erro: {type(ex).__name__}. Consulte o log do sistema."
-        )
+    _renderizar_perfil_simples(
+        "secretario_geral",
+        tipo_login="secretario_geral",
+        paginas_base=PAGINAS_SECRETARIO_GERAL,
+        pagina_padrao="cadastros",
+        sidebar_func=_sidebar_secretario_geral,
+        contexto_log="o secretário geral",
+    )
 
 
 def _ocultar_chrome_streamlit():
