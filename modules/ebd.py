@@ -2895,36 +2895,22 @@ def _render_escala(slug):
                     _renderizar_resultados_envio(resultados_lote)
                 st.divider()
 
-            for _, row in escala_avisos.iterrows():
-                titulo = f'{_fmt_data(row["data"])} - {row.get("classe", "Escola Bíblica")} - {row["professor"]}'
-                with st.expander(titulo):
-                    c1, c2 = st.columns(2)
-                    with c1:
-                        mensagem = _mensagem_escala(slug, row, row["professor"], "Professor")
-                        _botao_whatsapp("Avisar professor", row.get("telefone_professor", ""), mensagem, f"prof_{row['id_escala']}")
-                        st.text_area("Mensagem ao professor", value=mensagem, height=180, key=f"msg_prof_{row['id_escala']}")
-                    with c2:
-                        superintendente = str(row.get("superintendente", "") or "").strip()
-                        if superintendente:
-                            mensagem = _mensagem_escala(slug, row, superintendente, "Superintendente")
-                            _botao_whatsapp(
-                                "Avisar superintendente",
-                                row.get("telefone_superintendente", ""),
-                                mensagem,
-                                f"sup_{row['id_escala']}",
-                            )
-                            st.text_area("Mensagem ao superintendente", value=mensagem, height=180, key=f"msg_sup_{row['id_escala']}")
-                        else:
-                            st.info("Nenhum superintendente informado para esta escala.")
-                    c3, _ = st.columns(2)
-                    with c3:
-                        auxiliar = str(row.get("auxiliar", "") or "").strip()
-                        if auxiliar:
-                            mensagem = _mensagem_escala(slug, row, auxiliar, "Auxiliar")
-                            _botao_whatsapp("Avisar auxiliar", row.get("telefone_auxiliar", ""), mensagem, f"aux_{row['id_escala']}")
-                            st.text_area("Mensagem ao auxiliar", value=mensagem, height=180, key=f"msg_aux_{row['id_escala']}")
-                        else:
-                            st.info("Nenhum auxiliar informado para esta escala.")
+                for pessoa in pessoas_avisos:
+                    titulo = f'{pessoa["data"]} - {pessoa["classe"]} - {pessoa["funcao"]}: {pessoa["nome"]}'
+                    with st.expander(titulo):
+                        chave = f'{pessoa["funcao"].lower()}_{pessoa["id_escala"]}'
+                        _botao_whatsapp(
+                            f'Avisar {pessoa["funcao"].lower()}',
+                            pessoa["telefone"],
+                            pessoa["mensagem"],
+                            f"aviso_{chave}",
+                        )
+                        st.text_area(
+                            f'Mensagem ao(a) {pessoa["funcao"].lower()}',
+                            value=pessoa["mensagem"],
+                            height=180,
+                            key=f"msg_{chave}",
+                        )
 
 
 def _render_secretarios(slug):
