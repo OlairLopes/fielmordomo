@@ -465,14 +465,12 @@ def _injetar_css():
         header[data-testid="stHeader"] {background:transparent!important;height:3rem!important}
         #MainMenu,footer {display:none!important}
         [data-testid="stStatusWidget"] {display:none!important}
-        [data-testid="stSidebarCollapsedControl"] {display:flex!important;visibility:visible!important;
+        [data-testid="stExpandSidebarButton"] {display:flex!important;visibility:visible!important;
             opacity:1!important;position:fixed!important;top:12px!important;left:12px!important;
             z-index:999999!important;background:#061B44!important;border-radius:10px!important;
             padding:6px!important;box-shadow:0 2px 10px rgba(0,0,0,.30)!important}
-        [data-testid="stSidebarCollapsedControl"] button,
-        [data-testid="stSidebarCollapsedControl"] svg {color:white!important;fill:white!important}
-        button[kind="header"] {color:white!important;background:#061B44!important;border-radius:10px!important}
-        button[kind="header"] svg {color:white!important;fill:white!important}
+        [data-testid="stExpandSidebarButton"],
+        [data-testid="stExpandSidebarButton"] * {color:white!important;fill:white!important}
         section[data-testid="stSidebar"] {background:linear-gradient(180deg,#061B44 0%,#0A0A0A 100%)!important}
         section[data-testid="stSidebar"] * {color:white!important}
         section[data-testid="stSidebar"] .stButton button {width:100%;background:transparent!important;
@@ -977,7 +975,7 @@ def _ocultar_chrome_streamlit():
         <style>
         #MainMenu, footer {display:none!important}
         [data-testid="stStatusWidget"] {display:none!important}
-        [data-testid="stToolbar"] {display:none!important}
+        [data-testid="stAppDeployButton"] {display:none!important}
         </style>
         """,
         unsafe_allow_html=True,
