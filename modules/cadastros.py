@@ -1110,6 +1110,304 @@ def modal_excluir_cadastro(slug, sel):
 
 
 # ═══════════════════════════════════════════════════════════════════════
+# Ficha de cadastro: painel fixo (nao-modal) com toolbar de icones e
+# navegacao "registro anterior/proximo", estilo ficha de cadastro.
+# ═══════════════════════════════════════════════════════════════════════
+
+def _ficha_cadastro(slug, plano, p_info, congregacao_fixa, bloqueado, limite, registro, modo):
+    """Renderiza o formulario da ficha (novo, editando `registro`, ou
+    somente consulta quando modo == 'navegar')."""
+    novo = modo == "novo"
+    somente_leitura = modo == "navegar"
+
+    ver_key = f"cadf_ver_{slug}"
+    ver = st.session_state.get(ver_key, 0)
+    registro_id = "novo" if novo else str(int(_val(registro, "id_cadastro")))
+    kp = f"cadf_{slug}_v{ver}_r{registro_id}_"
+
+    tipo_atual = "Membro" if novo else (_val(registro, "tipo_cadastro") or "Membro")
+    idx_tipo = TIPOS_CADASTRO.index(tipo_atual) if tipo_atual in TIPOS_CADASTRO else 0
+
+    col_tipo, col_nome, col_doc = st.columns([1, 2, 1.3])
+    with col_tipo:
+        tipo = st.selectbox(
+            "Tipo", TIPOS_CADASTRO, index=idx_tipo,
+            format_func=_rotulo_tipo_cadastro, key=kp + "tipo",
+            disabled=somente_leitura,
+        )
+    with col_nome:
+        nome = st.text_input(
+            "Nome completo",
+            value="" if novo else _val(registro, "nome"),
+            key=kp + "nome", disabled=somente_leitura,
+        )
+    with col_doc:
+        doc_label = "CPF *" if tipo == "Membro" else "CNPJ *"
+        doc_placeholder = "000.000.000-00" if tipo == "Membro" else "00.000.000/0000-00"
+        cpf_atual = "" if novo else _val(registro, "cpf")
+        cpf = st.text_input(
+            doc_label,
+            value=_formatar_doc(cpf_atual, tipo) if cpf_atual else "",
+            placeholder=doc_placeholder,
+            key=kp + "cpf", disabled=somente_leitura,
+        )
+
+    if novo and tipo == "Membro" and bloqueado:
+        st.error(
+            f"⚠️ Voce atingiu o limite de **{limite} membros** do plano "
+            f"**{p_info['nome']}**. Faca upgrade para "
+            f"**{proximo_plano(plano).capitalize()}** para cadastrar mais membros."
+        )
+        return
+
+    col_dn, col_sexo, col_funcao, col_sit = st.columns([1.1, 1, 1.3, 1])
+    with col_dn:
+        dn_atual = None if novo else _val(registro, "data_nascimento")
+        try:
+            dn_value = datetime.date.fromisoformat(dn_atual) if dn_atual else None
+        except ValueError:
+            dn_value = None
+        dt_nasc = st.date_input(
+            "Data nasc." if tipo == "Membro" else "Fundacao",
+            value=dn_value,
+            format="DD/MM/YYYY",
+            key=kp + "dn",
+            min_value=datetime.date(1900, 1, 1),
+            max_value=datetime.date.today(),
+            disabled=somente_leitura,
+        )
+    with col_sexo:
+        if tipo == "Membro":
+            sexo_atual = "" if novo else _val(registro, "sexo")
+            idx_sexo = SEXO_OPC.index(sexo_atual) if sexo_atual in SEXO_OPC else 2
+            sexo = st.selectbox(
+                "Sexo", SEXO_OPC, index=idx_sexo, key=kp + "sexo",
+                disabled=somente_leitura,
+            )
+        else:
+            sexo = ""
+    with col_funcao:
+        if tipo == "Membro":
+            funcao_atual = "" if novo else _val(registro, "funcao")
+            idx_funcao = FUNCOES.index(funcao_atual) if funcao_atual in FUNCOES else 0
+            funcao = st.selectbox(
+                "Funcao", FUNCOES, index=idx_funcao, key=kp + "funcao",
+                disabled=somente_leitura,
+            )
+        else:
+            funcao = ""
+    with col_sit:
+        sit_opc = ["Ativo", "Inativo"]
+        sit_atual = "Ativo" if novo else (_val(registro, "situacao") or "Ativo")
+        sit = st.selectbox(
+            "Situacao", sit_opc,
+            index=sit_opc.index(sit_atual) if sit_atual in sit_opc else 0,
+            key=kp + "sit", disabled=somente_leitura,
+        )
+
+    st.text_input(
+        "Congregacao", value=congregacao_fixa, disabled=True,
+        key=kp + "cong",
+        help="Definida automaticamente pelo identificador da igreja logada.",
+    )
+
+    st.markdown("**Contato e endereço**")
+    col_tel, col_log, col_num = st.columns([1.2, 2.4, 0.8])
+    with col_tel:
+        tel_atual = "" if novo else _val(registro, "telefone")
+        telefone = st.text_input(
+            "Telefone / WhatsApp",
+            value=_formatar_tel(tel_atual) if tel_atual else "",
+            placeholder="(00) 00000-0000",
+            key=kp + "tel", disabled=somente_leitura,
+        )
+    with col_log:
+        logradouro = st.text_input(
+            "Rua / Avenida",
+            value="" if novo else _val(registro, "logradouro"),
+            key=kp + "log", disabled=somente_leitura,
+        )
+    with col_num:
+        numero = st.text_input(
+            "Numero",
+            value="" if novo else _val(registro, "numero"),
+            key=kp + "num", disabled=somente_leitura,
+        )
+
+    col_bai, col_cid, col_cep = st.columns([1.4, 1.4, 1])
+    with col_bai:
+        bairro = st.text_input(
+            "Bairro",
+            value="" if novo else _val(registro, "bairro"),
+            key=kp + "bai", disabled=somente_leitura,
+        )
+    with col_cid:
+        cidade = st.text_input(
+            "Cidade",
+            value=("Minacu" if novo else _val(registro, "cidade")),
+            key=kp + "cid", disabled=somente_leitura,
+        )
+    with col_cep:
+        cep_atual = "" if novo else _val(registro, "cep")
+        cep = st.text_input(
+            "CEP",
+            value=_formatar_cep(cep_atual) if cep_atual else ("76450-000" if novo else ""),
+            key=kp + "cep", disabled=somente_leitura,
+        )
+
+    if somente_leitura:
+        return
+
+    c_salvar, c_cancelar = st.columns([1, 1])
+    with c_salvar:
+        salvar = st.button(
+            "Salvar", type="primary", icon=":material/save:",
+            use_container_width=True, key=kp + "salvar",
+        )
+    with c_cancelar:
+        cancelar = st.button(
+            "Cancelar", use_container_width=True, key=kp + "cancelar",
+        )
+
+    if cancelar:
+        st.session_state[ver_key] = ver + 1
+        st.session_state[f"cadf_modo_{slug}"] = "navegar"
+        st.rerun()
+
+    if salvar:
+        dn_str = dt_nasc.isoformat() if dt_nasc else ""
+        id_atual = None if novo else int(_val(registro, "id_cadastro"))
+        c = Cadastro(
+            id_cadastro=id_atual,
+            nome=nome,
+            tipo_cadastro=tipo,
+            funcao=funcao,
+            congregacao=congregacao_fixa,
+            cpf=cpf,
+            situacao=sit,
+            data_nascimento=dn_str,
+            sexo=sexo,
+            telefone=telefone,
+            logradouro=logradouro,
+            numero=numero,
+            bairro=bairro,
+            cidade=cidade,
+            cep=cep,
+        )
+        erros = c.validar()
+
+        doc_limpo = limpar_documento(cpf)
+        if not novo and tipo == "Membro" and _val(registro, "tipo_cadastro") != "Membro" and bloqueado:
+            erros.append(f"O plano {p_info['nome']} atingiu o limite de membros.")
+        if doc_limpo:
+            id_excluir = id_atual if not novo else None
+            if cpf_existe(slug, doc_limpo, id_excluir=id_excluir):
+                doc_tipo = "CPF" if tipo == "Membro" else "CNPJ"
+                erros.append(doc_tipo + " ja cadastrado.")
+
+        if erros:
+            for e in erros:
+                st.error(e)
+        else:
+            try:
+                if novo:
+                    inserir_cadastro(slug, c)
+                else:
+                    atualizar_cadastro(slug, c)
+            except LimiteMembrosExcedido as ex:
+                st.error(str(ex))
+            except Exception as ex:
+                st.error(f"Erro ao salvar: {ex}")
+            else:
+                _invalida(slug)
+                st.session_state[ver_key] = ver + 1
+                st.session_state[f"cadf_modo_{slug}"] = "navegar"
+                st.toast("✅ Cadastro salvo!")
+                st.rerun()
+
+
+def _painel_cadastros(slug, df, plano, p_info, congregacao_fixa, bloqueado, limite):
+    """Toolbar de icones + ficha do cadastro atual, com navegacao
+    'registro anterior/proximo' entre os cadastros existentes."""
+    st.markdown(
+        """
+        <style>
+        div[class*="st-key-cad_toolbar_"] .stButton button {
+            padding:8px 10px!important;min-width:0!important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    sk_modo = f"cadf_modo_{slug}"
+    sk_idx = f"cadf_idx_{slug}"
+
+    df_ficha = df.sort_values("nome", kind="stable").reset_index(drop=True) if not df.empty else df
+    ids_ficha = df_ficha["id_cadastro"].astype(int).tolist() if not df_ficha.empty else []
+
+    if sk_modo not in st.session_state:
+        st.session_state[sk_modo] = "navegar" if ids_ficha else "novo"
+    if sk_idx not in st.session_state or st.session_state[sk_idx] >= len(ids_ficha):
+        st.session_state[sk_idx] = 0
+
+    modo = st.session_state[sk_modo]
+    idx = st.session_state[sk_idx]
+
+    registro_atual = None
+    if modo != "novo" and ids_ficha:
+        linhas = df_ficha[df_ficha["id_cadastro"] == ids_ficha[idx]]
+        if not linhas.empty:
+            registro_atual = linhas.iloc[0]
+
+    st.markdown("### 🗂️ Ficha de cadastro")
+
+    with st.container(key=f"cad_toolbar_{slug}", horizontal=True, gap="small"):
+        if st.button("", key=f"cadt_novo_{slug}", icon=":material/add:", help="Novo cadastro"):
+            st.session_state[sk_modo] = "novo"
+            st.rerun()
+        if st.button(
+            "", key=f"cadt_editar_{slug}", icon=":material/edit:", help="Editar",
+            disabled=registro_atual is None or modo == "novo",
+        ):
+            st.session_state[sk_modo] = "editar"
+            st.rerun()
+        if st.button(
+            "", key=f"cadt_ant_{slug}", icon=":material/arrow_back:", help="Registro anterior",
+            disabled=not ids_ficha or idx <= 0,
+        ):
+            st.session_state[sk_idx] = idx - 1
+            st.session_state[sk_modo] = "navegar"
+            st.rerun()
+        if st.button(
+            "", key=f"cadt_prox_{slug}", icon=":material/arrow_forward:", help="Proximo registro",
+            disabled=not ids_ficha or idx >= len(ids_ficha) - 1,
+        ):
+            st.session_state[sk_idx] = idx + 1
+            st.session_state[sk_modo] = "navegar"
+            st.rerun()
+        if st.button(
+            "", key=f"cadt_excluir_{slug}", icon=":material/delete:", help="Excluir",
+            disabled=registro_atual is None or modo == "novo",
+        ):
+            modal_excluir_cadastro(slug, registro_atual)
+        if st.button("", key=f"cadt_atualizar_{slug}", icon=":material/refresh:", help="Atualizar lista"):
+            _invalida(slug)
+            st.rerun()
+
+    if modo != "novo" and ids_ficha:
+        st.caption(f"Registro {idx + 1} de {len(ids_ficha)}")
+    elif not ids_ficha and modo != "novo":
+        st.info("Nenhum cadastro ainda. Use o botao ➕ da barra acima para criar o primeiro.")
+        return
+
+    disabled_navegar = modo == "navegar"
+    if disabled_navegar:
+        st.caption("Modo consulta — clique no lapis da barra acima para editar.")
+
+    _ficha_cadastro(slug, plano, p_info, congregacao_fixa, bloqueado, limite, registro_atual, modo)
+
+
+# ═══════════════════════════════════════════════════════════════════════
 # Funcao principal: render()
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -1209,15 +1507,6 @@ def render():
         </div>
         """, unsafe_allow_html=True)
 
-    # ─── BOTAO PRINCIPAL: Novo cadastro ─────────────────────────────
-    if st.button(
-        "➕ Novo cadastro",
-        type="primary",
-        use_container_width=True,
-        key="btn_abrir_novo",
-    ):
-        modal_novo_cadastro(slug, plano, p_info, congregacao_fixa, bloqueado, limite)
-
     # ─── Tabela de cadastros ────────────────────────────────────────
     total = len(df)
     with st.expander(f"📋 Ver cadastros ({total} registros)", expanded=False):
@@ -1259,50 +1548,9 @@ def render():
             df_view = df_view.rename(columns={"cpf": "documento"})
             st.dataframe(df_view, use_container_width=True)
 
-    # ─── Acoes em cadastros existentes (Visualizar/Editar/Excluir) ──
-    if not df.empty:
-        st.divider()
-        st.markdown("### 🎯 Acoes em cadastro existente")
-
-        df_r = df.reset_index(drop=True)
-        df_r["rotulo"] = df_r.apply(
-            lambda r: f'{int(r["id_cadastro"])} | {r["tipo_cadastro"]} | {r["nome"]} | {r["situacao"]}',
-            axis=1,
-        )
-
-        rotulo = st.selectbox(
-            "Selecione um cadastro",
-            df_r["rotulo"].tolist(),
-            key="sel_cad_acao",
-        )
-
-        sel = df_r[df_r["rotulo"] == rotulo].iloc[0]
-
-        c_view, c_edit, c_del = st.columns(3)
-
-        with c_view:
-            if st.button(
-                "👁️ Visualizar",
-                use_container_width=True,
-                key="btn_abrir_view",
-            ):
-                modal_visualizar_cadastro(sel, igreja)
-
-        with c_edit:
-            if st.button(
-                "✏️ Editar",
-                use_container_width=True,
-                key="btn_abrir_edit",
-            ):
-                modal_editar_cadastro(slug, sel, plano, p_info, congregacao_fixa, bloqueado)
-
-        with c_del:
-            if st.button(
-                "🗑️ Excluir",
-                use_container_width=True,
-                key="btn_abrir_del",
-            ):
-                modal_excluir_cadastro(slug, sel)
+    # ─── Ficha de cadastro (toolbar + navegacao por registro) ───────
+    st.divider()
+    _painel_cadastros(slug, df, plano, p_info, congregacao_fixa, bloqueado, limite)
 
     # ─── Imprimir formulario (mantido como expander) ────────────────
     with st.expander("🖨️ Imprimir formulario de cadastro de membro", expanded=False):

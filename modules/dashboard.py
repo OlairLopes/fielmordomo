@@ -1121,6 +1121,13 @@ def _injetar_css():
     .dash-card { background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:16px;
         height:100%;display:flex;flex-direction:column;justify-content:space-between;
         min-height:112px;box-sizing:border-box;box-shadow:0 1px 2px rgba(10,27,61,.05); }
+    .dash-card.tem-selo { flex-direction:row;align-items:flex-start;gap:12px; }
+    .dash-card-selo {
+        width:40px;height:40px;border-radius:10px;flex-shrink:0;color:#fff;
+        display:flex;align-items:center;justify-content:center;
+    }
+    .dash-card-selo .material-symbols-rounded { font-size:21px; }
+    .dash-card-texto { display:flex;flex-direction:column;flex:1;min-width:0; }
     .dash-label { color:#64748B;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em; }
     .dash-value { color:#10213A;font-size:1.45rem;font-weight:700;margin-top:5px; }
     .dash-note { color:#475569;font-size:.76rem;margin-top:5px; }
@@ -2043,20 +2050,21 @@ def render():
         nota_ent = f"{_variacao(ent, ent_ant)} vs mes ant."
         if ent_mma > 0:
             nota_ent += f" | {_variacao(ent, ent_mma)} vs mesmo mes ano ant."
-        _card("Entradas", formatar_moeda(ent), nota_ent)
+        _card("Entradas", formatar_moeda(ent), nota_ent, icone="payments", cor=CORES["entrada"])
     with c2:
         nota_sai = f"{_variacao(sai, sai_ant)} vs mes ant."
         if sai_mma > 0:
             nota_sai += f" | {_variacao(sai, sai_mma)} vs mesmo mes ano ant."
-        _card("Saidas", formatar_moeda(sai), nota_sai)
+        _card("Saidas", formatar_moeda(sai), nota_sai, icone="trending_down", cor=CORES["saida"])
     with c3:
         nota_saldo = f"{_variacao(saldo, saldo_ant)} vs mes ant."
         if saldo_mma != 0:
             nota_saldo += f" | {_variacao(saldo, saldo_mma)} vs mesmo mes ano ant."
-        _card("Saldo", formatar_moeda(saldo), nota_saldo)
+        _card("Saldo", formatar_moeda(saldo), nota_saldo, icone="account_balance_wallet", cor=CORES["saldo"])
     with c4:
         _card("Participacao dizimistas ativos", f"{pct_diz:.1f}%",
-              f"{qtd_diz} de {membros_n} membros ativos")
+              f"{qtd_diz} de {membros_n} membros ativos",
+              icone="volunteer_activism", cor="#534AB7")
 
     tab_visao, tab_despesas, tab_receitas, tab_pastoral = st.tabs([
         "Visao Executiva", "Despesas", "Receitas",

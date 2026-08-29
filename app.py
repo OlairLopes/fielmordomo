@@ -96,23 +96,23 @@ PAGINAS_LIBERAVEIS = {
 # ═══════════════════════════════════════════════════════════════════════
 
 ICONES_MENU = {
-    "home": "🏠",
-    "cadastros": "👥",
-    "lancamentos": "💰",
-    "relatorios": "📈",
-    "dashboard": "📊",
-    "geo_frequencia": "📍",
-    "ebd": "📚",
-    "gfc": "👨‍👩‍👧",
-    "orhafe": "🙏",
-    "obreiros": "⛪",
-    "eventos": "📅",
-    "visitantes": "🤝",
-    "pedidos_oracao": "🕊️",
-    "tesoureiros": "💼",
-    "aniversariantes": "🎂",
-    "backup": "💾",
-    "minha_conta": "👤",
+    "home": "home",
+    "cadastros": "group",
+    "lancamentos": "payments",
+    "relatorios": "summarize",
+    "dashboard": "bar_chart",
+    "geo_frequencia": "location_on",
+    "ebd": "menu_book",
+    "gfc": "family_restroom",
+    "orhafe": "self_improvement",
+    "obreiros": "groups",
+    "eventos": "calendar_month",
+    "visitantes": "handshake",
+    "pedidos_oracao": "volunteer_activism",
+    "tesoureiros": "work",
+    "aniversariantes": "cake",
+    "backup": "backup",
+    "minha_conta": "person",
 }
 
 # Agrupamento visual da sidebar da igreja (ordem controlada)
@@ -426,18 +426,20 @@ def _paginas_ordenadas(paginas):
 
 
 def _rotulo_menu(chave, rotulo):
-    """Concatena icone + rotulo. Icone vem de ICONES_MENU."""
-    icone = ICONES_MENU.get(chave, "")
-    return f"{icone}  {rotulo}" if icone else rotulo
+    return rotulo
+
+
+def _icone_menu(chave):
+    """Icone Material Symbols (formato aceito por st.button(icon=...))."""
+    nome = ICONES_MENU.get(chave, "circle")
+    return f":material/{nome}:"
 
 
 def _botao_inicio_sidebar(key, pagina_destino):
-    # Icone da pagina destino (fallback casa se nao encontrado)
-    icone = ICONES_MENU.get(pagina_destino, "🏠")
-    rotulo_inicio = f"{icone}  Inicio"
     if st.button(
-        rotulo_inicio,
+        "Inicio",
         key=key,
+        icon=_icone_menu(pagina_destino),
         use_container_width=True,
         type="primary" if st.session_state.get("pagina") == pagina_destino else "secondary",
     ):
@@ -479,20 +481,20 @@ def _injetar_css():
             letter-spacing:.05em!important;text-transform:uppercase!important;
             border-radius:8px!important;margin-bottom:2px!important;transition:.2s;
             justify-content:flex-start!important;display:flex!important}
-        section[data-testid="stSidebar"] .stButton button p,
-        section[data-testid="stSidebar"] .stButton button div,
-        section[data-testid="stSidebar"] .stButton button span {
+        section[data-testid="stSidebar"] .stButton button [data-testid="stMarkdownContainer"],
+        section[data-testid="stSidebar"] .stButton button [data-testid="stMarkdownContainer"] p {
             text-align:left!important;text-transform:uppercase!important;
             letter-spacing:.05em!important;width:100%!important}
+        section[data-testid="stSidebar"] .stButton button [data-testid="stIconMaterial"] {
+            font-size:1.05rem!important;flex-shrink:0!important}
         section[data-testid="stSidebar"] .stButton button:hover {background:rgba(212,175,55,.18)!important;
             color:#D4AF37!important}
         section[data-testid="stSidebar"] .stButton button[kind="primary"] {
             background:rgba(212,175,55,.25)!important;color:#D4AF37!important;font-weight:800!important;
             border-left:3px solid #D4AF37!important;text-align:left!important;
             justify-content:flex-start!important}
-        section[data-testid="stSidebar"] .stButton button[kind="primary"] p,
-        section[data-testid="stSidebar"] .stButton button[kind="primary"] div,
-        section[data-testid="stSidebar"] .stButton button[kind="primary"] span {
+        section[data-testid="stSidebar"] .stButton button[kind="primary"] [data-testid="stMarkdownContainer"],
+        section[data-testid="stSidebar"] .stButton button[kind="primary"] [data-testid="stMarkdownContainer"] p {
             text-align:left!important;text-transform:uppercase!important}
         .sidebar-grupo {
             font-size:.68rem!important;
@@ -514,6 +516,22 @@ def _injetar_css():
         .sidebar-info .plano {font-size:.68rem;color:rgba(255,255,255,.65)!important;margin-top:2px}
         .block-container {padding-top:3.5rem!important;padding-left:2rem!important;
             padding-right:2rem!important;max-width:100%!important}
+        /* Tira de abas (workspace) do perfil Igreja */
+        .st-key-fm_tira_abas {
+            border-bottom:2px solid #E2E8F0!important;margin-bottom:18px!important;
+            padding-bottom:2px!important;flex-wrap:wrap!important;
+        }
+        .st-key-fm_tira_abas .stButton button {
+            border-radius:10px 10px 0 0!important;
+            padding:7px 14px!important;font-size:.82rem!important;font-weight:600!important;
+        }
+        .st-key-fm_tira_abas .stButton button[kind="secondary"] {
+            background:#F1F5F9!important;color:#475569!important;border-color:#E2E8F0!important;
+        }
+        .st-key-fm_tira_abas [data-testid^="stBaseButton-secondary"][aria-label*="Fechar"],
+        .st-key-fm_tira_abas button[title^="Fechar"] {
+            padding:7px 8px!important;min-width:0!important;
+        }
         /* Responsivo mobile */
         @media (max-width: 768px) {
             section[data-testid="stSidebar"] .stButton button {
@@ -622,6 +640,7 @@ def _sidebar_igreja(pagina_atual, igreja):
         if st.button(
             _rotulo_menu("home", "Inicio"),
             key="sb_inicio_igreja",
+            icon=_icone_menu("home"),
             use_container_width=True,
             type="primary" if pagina_atual == "home" else "secondary",
         ):
@@ -655,6 +674,7 @@ def _sidebar_igreja(pagina_atual, igreja):
                 if st.button(
                     _rotulo_menu(chave, rotulo),
                     key=f"sb_{chave}",
+                    icon=_icone_menu(chave),
                     use_container_width=True,
                     type="primary" if pagina_atual == chave else "secondary",
                 ):
@@ -678,6 +698,7 @@ def _sidebar_igreja(pagina_atual, igreja):
                 if st.button(
                     _rotulo_menu(chave, rotulo),
                     key=f"sb_orfa_{chave}",
+                    icon=_icone_menu(chave),
                     use_container_width=True,
                     type="primary" if pagina_atual == chave else "secondary",
                 ):
@@ -685,7 +706,7 @@ def _sidebar_igreja(pagina_atual, igreja):
                     st.rerun()
 
         st.divider()
-        if st.button("🚪  Sair", key="sb_sair", use_container_width=True):
+        if st.button("Sair", key="sb_sair", icon=":material/logout:", use_container_width=True):
             _auth().logout()
 
 
@@ -697,9 +718,12 @@ def _sidebar_admin():
             '<div class="plano">Painel do sistema</div></div>',
             unsafe_allow_html=True,
         )
-        st.button("🏠  Inicio", key="sb_inicio_admin", use_container_width=True, type="primary")
+        st.button(
+            "Inicio", key="sb_inicio_admin", icon=":material/home:",
+            use_container_width=True, type="primary",
+        )
         st.divider()
-        if st.button("🚪  Sair", key="sb_sair_admin", use_container_width=True):
+        if st.button("Sair", key="sb_sair_admin", icon=":material/logout:", use_container_width=True):
             _auth().logout()
 
 
@@ -727,13 +751,14 @@ def _sidebar_perfil_simples(
             if st.button(
                 _rotulo_menu(chave, rotulo),
                 key=f"{key_prefix}_{chave}",
+                icon=_icone_menu(chave),
                 use_container_width=True,
                 type="primary" if pagina_atual == chave else "secondary",
             ):
                 st.session_state["pagina"] = chave
                 st.rerun()
         st.divider()
-        if st.button("🚪  Sair", key=f"{key_prefix}_sair", use_container_width=True):
+        if st.button("Sair", key=f"{key_prefix}_sair", icon=":material/logout:", use_container_width=True):
             _auth().logout()
 
 
@@ -850,6 +875,93 @@ def _renderizar_admin():
         st.error("Não foi possível carregar o painel administrativo. Consulte o log do sistema.")
 
 
+def _renderizar_navbar(rotulo_secao, nome_igreja):
+    """Barra superior fixa, inspirada no padrao 'workspace' de sistemas
+    de gestao eclesiastica de mercado. O sino e a grade de apps sao
+    decorativos por enquanto — ainda nao existe backend de notificacoes
+    ou atalhos rapidos no FielMordomo."""
+    st.markdown(
+        f"""
+        <div class="fm-navbar">
+            <div class="fm-navbar-secao">{_esc(rotulo_secao)}</div>
+            <div class="fm-navbar-igreja">{_esc(nome_igreja)}</div>
+            <div class="fm-navbar-acoes">
+                <span class="material-symbols-rounded" title="Notificacoes">notifications</span>
+                <span class="material-symbols-rounded" title="Aplicativos">apps</span>
+                <span class="material-symbols-rounded" title="Minha conta">account_circle</span>
+            </div>
+        </div>
+        <style>
+        .fm-navbar {{
+            display:flex;align-items:center;justify-content:space-between;gap:14px;
+            background:linear-gradient(90deg,#061B44,#0B3A66);
+            color:#fff;padding:11px 22px;border-radius:12px;margin-bottom:14px;
+            box-shadow:0 4px 14px rgba(6,27,68,.18);
+        }}
+        .fm-navbar-secao {{
+            font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+            color:#D4AF37;flex:0 0 auto;
+        }}
+        .fm-navbar-igreja {{
+            font-size:.95rem;font-weight:700;text-align:center;flex:1 1 auto;
+        }}
+        .fm-navbar-acoes {{
+            display:flex;gap:16px;flex:0 0 auto;
+        }}
+        .fm-navbar-acoes .material-symbols-rounded {{
+            font-size:21px;color:rgba(255,255,255,.85);cursor:default;
+        }}
+        @media (max-width:640px) {{
+            .fm-navbar-igreja {{font-size:.82rem}}
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _fechar_aba_igreja(chave):
+    abas = st.session_state.get("abas_abertas", [])
+    if chave in abas:
+        idx = abas.index(chave)
+        abas = [a for a in abas if a != chave]
+        st.session_state["abas_abertas"] = abas
+        if st.session_state.get("pagina") == chave:
+            st.session_state["pagina"] = abas[min(idx, len(abas) - 1)] if abas else "home"
+    st.rerun()
+
+
+def _tira_abas_igreja(pagina_atual):
+    """Tira de abas com as paginas abertas nesta sessao (estilo
+    'workspace' com varias telas abertas ao mesmo tempo). E aditiva:
+    st.session_state['pagina'] continua sendo a fonte da verdade sobre
+    o que renderizar — isto e so mais uma forma de navegar ate ela."""
+    abas = st.session_state.get("abas_abertas") or []
+    if pagina_atual not in abas:
+        abas = abas + [pagina_atual]
+    st.session_state["abas_abertas"] = abas
+
+    with st.container(key="fm_tira_abas", horizontal=True, gap="small"):
+        for chave in abas:
+            rotulo, _ = PAGINAS_IGREJA.get(chave, (chave.capitalize(), None))
+            if st.button(
+                rotulo,
+                key=f"fm_aba_{chave}",
+                icon=_icone_menu(chave),
+                type="primary" if chave == pagina_atual else "secondary",
+            ):
+                st.session_state["pagina"] = chave
+                st.rerun()
+            if len(abas) > 1:
+                if st.button(
+                    "",
+                    key=f"fm_aba_x_{chave}",
+                    icon=":material/close:",
+                    help=f"Fechar {rotulo}",
+                ):
+                    _fechar_aba_igreja(chave)
+
+
 def _renderizar_igreja():
     igreja = st.session_state.get("igreja", {})
     if not isinstance(igreja, dict) or not igreja.get("slug"):
@@ -862,6 +974,8 @@ def _renderizar_igreja():
         pagina = "home"
         st.session_state["pagina"] = pagina
     _sidebar_igreja(pagina, igreja)
+    _renderizar_navbar("Gestor", igreja.get("nome", "FielMordomo"))
+    _tira_abas_igreja(pagina)
     _, caminho_modulo = PAGINAS_IGREJA[pagina]
     _renderizar_modulo(caminho_modulo, pagina)
 
@@ -990,13 +1104,30 @@ def _aplicar_tipografia():
         """
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0&display=block" rel="stylesheet">
         <style>
         html, body, [class*="css"] {
             font-family: 'Public Sans', -apple-system, 'Segoe UI', Arial, sans-serif;
         }
         h1, h2, h3 {
             font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+        }
+        /* Icones da barra superior customizada (fora dos widgets nativos,
+           que ja usam Material Symbols embutido via icon=":material/..."). */
+        .material-symbols-rounded {
+            font-family: 'Material Symbols Rounded';
+            font-weight: normal;
+            font-style: normal;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            font-variation-settings: 'opsz' 24, 'wght' 400, 'FILL' 0, 'GRAD' 0;
+            -webkit-font-smoothing: antialiased;
+            vertical-align: middle;
         }
         </style>
         """,
