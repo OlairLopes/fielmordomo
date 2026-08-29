@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from utils.helpers import formatar_moeda as _moeda
+
 
 AZUL = "0B3A66"
 AZUL_CLARO = "EAF2FB"
@@ -18,13 +20,6 @@ def _texto(valor) -> str:
     if valor is None or pd.isna(valor):
         return ""
     return str(valor)
-
-
-def _moeda(valor) -> str:
-    try:
-        return f"R$ {float(valor):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-    except (TypeError, ValueError):
-        return "R$ 0,00"
 
 
 def _periodo_texto(periodo) -> str:
