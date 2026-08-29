@@ -1,3 +1,4 @@
+import logging
 import base64
 import datetime
 import html
@@ -128,7 +129,7 @@ def _parse_data(valor):
         if pd.notna(data):
             return data.date()
     except Exception:
-        pass
+        logging.exception("Erro ignorado silenciosamente")
 
     texto = str(valor or "").strip()
     if not texto:
@@ -137,7 +138,7 @@ def _parse_data(valor):
         try:
             return datetime.datetime.strptime(texto, formato).date()
         except Exception:
-            pass
+            logging.exception("Erro ignorado silenciosamente")
     return None
 
 
@@ -233,7 +234,7 @@ def _int_seguro(valor, padrao=0):
         if pd.isna(valor):
             return int(padrao)
     except Exception:
-        pass
+        logging.exception("Erro ignorado silenciosamente")
     try:
         texto = str(valor).strip()
         if not texto:
@@ -248,7 +249,7 @@ def _float_seguro(valor, padrao=0.0):
         if pd.isna(valor):
             return float(padrao)
     except Exception:
-        pass
+        logging.exception("Erro ignorado silenciosamente")
     try:
         texto = str(valor).strip()
         if not texto:

@@ -1,6 +1,7 @@
 """
 Autenticação do FielMordomo.
 """
+import logging
 
 import base64
 import hashlib
@@ -98,14 +99,14 @@ def _persistir_sessao_cookie(**dados):
             secure=True,
         )
     except Exception:
-        pass
+        logging.exception("Erro ignorado silenciosamente")
 
 
 def _remover_sessao_cookie():
     try:
         _cookie_controller().remove(SESSAO_COOKIE_NOME)
     except Exception:
-        pass
+        logging.exception("Erro ignorado silenciosamente")
 
 
 def _tela_carregando_sessao():
@@ -211,7 +212,7 @@ def _exibir_logo_sistema():
     resultado = obter_logo_sistema()
     if resultado:
         dados, _ext = resultado
-        st.image(dados, width=150)
+        st.image(dados, width=150, caption="Logotipo do sistema")
     else:
         st.markdown(
             """
@@ -471,7 +472,7 @@ def _selecionar_modo_login(modo):
         st.query_params["acesso"] = modo
         st.session_state["_login_acesso_url_aplicado"] = modo
     except Exception:
-        pass
+        logging.exception("Erro ignorado silenciosamente")
     st.rerun()
 
 

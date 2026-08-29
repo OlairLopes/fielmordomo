@@ -1,4 +1,5 @@
-﻿import datetime
+﻿import logging
+import datetime
 import html
 import sqlite3
 
@@ -185,7 +186,7 @@ def _garantir_tabela_historico(slug):
             conn.commit()
         st.session_state[flag] = True
     except Exception:
-        pass
+        logging.exception("Erro ignorado silenciosamente")
 
 
 def _listar_historico(slug, id_cadastro):

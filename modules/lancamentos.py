@@ -167,6 +167,7 @@ def _ler_csv_pix(arquivo):
         try:
             return pd.read_csv(io.BytesIO(dados), sep=None, engine="python", encoding=encoding)
         except Exception:
+            logging.exception("Erro ignorado silenciosamente")
             continue
     raise ValueError("Nao foi possivel ler o CSV. Verifique o arquivo ou a codificacao.")
 

@@ -2309,7 +2309,7 @@ def salvar_ebd_chamada(
                 try:
                     return datetime.datetime.strptime(texto, formato).date().isoformat()
                 except Exception:
-                    pass
+                    logging.exception("Erro ignorado silenciosamente")
             return texto
 
         data_ref = normalizar_data_texto(data_ref)
@@ -3202,7 +3202,7 @@ def salvar_orhafe_chamada(
                 try:
                     return datetime.datetime.strptime(texto, formato).date().isoformat()
                 except Exception:
-                    pass
+                    logging.exception("Erro ignorado silenciosamente")
             return texto
 
         data_ref = normalizar_data_texto(data_ref)
@@ -7333,7 +7333,7 @@ def restaurar_backup_zip(zip_bytes: bytes) -> dict:
             try:
                 _fazer_backup(MASTER_DB)
             except Exception:
-                pass
+                logging.exception("Erro ignorado silenciosamente")
 
             slugs_existentes = set()
             try:
@@ -7341,7 +7341,7 @@ def restaurar_backup_zip(zip_bytes: bytes) -> dict:
                     rows = conn.execute("SELECT slug FROM igrejas").fetchall()
                     slugs_existentes = {r["slug"] for r in rows}
             except Exception:
-                pass
+                logging.exception("Erro ignorado silenciosamente")
 
             if arquivo_master:
                 try:
@@ -7356,7 +7356,7 @@ def restaurar_backup_zip(zip_bytes: bytes) -> dict:
                             rows = conn.execute("SELECT slug FROM igrejas").fetchall()
                             slugs_existentes = {r["slug"] for r in rows}
                     except Exception:
-                        pass
+                        logging.exception("Erro ignorado silenciosamente")
                 except Exception as ex:
                     resultado["erros"].append(f"master.db: {ex}")
 
@@ -7382,7 +7382,7 @@ def restaurar_backup_zip(zip_bytes: bytes) -> dict:
                         try:
                             _fazer_backup(db_destino)
                         except Exception:
-                            pass
+                            logging.exception("Erro ignorado silenciosamente")
 
                     dados_db = zf.read(caminho_zip)
                     _substituir_banco_validado(

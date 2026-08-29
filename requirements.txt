@@ -2,8 +2,10 @@ streamlit>=1.32.0
 pandas>=2.0.0
 plotly>=5.18.0
 openpyxl>=3.1.0
-pypdf>=4.0.0
+pypdf>=6.15.0
 requests>=2.31.0
+urllib3>=2.7.0
+pillow>=12.3.0
 -e .
 streamlit-geolocation>=0.0.10
 streamlit-cookies-controller>=0.0.4

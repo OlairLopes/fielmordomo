@@ -10,6 +10,7 @@ REQUISITOS:
     requirements.txt deve conter:
         streamlit-geolocation>=0.0.10
 """
+import logging
 
 import datetime
 import html
@@ -179,7 +180,7 @@ def _ler_config_evento(slug, id_evento):
                     "mensagem_lembrete": str(row[5] or ""),
                 }
     except Exception:
-        pass
+        logging.exception("Erro ignorado silenciosamente")
 
     return config_padrao
 
@@ -238,7 +239,7 @@ def _str_to_time(s):
         if len(partes) >= 2:
             return datetime.time(int(partes[0]), int(partes[1]))
     except Exception:
-        pass
+        logging.exception("Erro ignorado silenciosamente")
     return None
 
 
@@ -557,7 +558,7 @@ def _marcar_token_usado(slug, token, resultado):
             )
             conn.commit()
     except Exception:
-        pass
+        logging.exception("Erro ignorado silenciosamente")
 
 
 def _url_checkin(slug, token):
@@ -704,7 +705,7 @@ def _extrair_coordenadas_google_maps(texto):
         if decoded != texto_original:
             candidatos.append(decoded)
     except Exception:
-        pass
+        logging.exception("Erro ignorado silenciosamente")
 
     padroes = [
         r"@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)",

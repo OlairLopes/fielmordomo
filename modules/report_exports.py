@@ -1,3 +1,4 @@
+import logging
 import datetime
 import html
 import io
@@ -239,7 +240,7 @@ def gerar_pdf_relatorio(
             imagem.hAlign = "CENTER"
             historia.append(imagem)
         except Exception:
-            pass
+            logging.exception("Erro ignorado silenciosamente")
 
     nome_igreja = html.escape(_texto(igreja.get("nome", "Igreja")))
     historia.extend([

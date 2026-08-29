@@ -1,3 +1,4 @@
+import logging
 import datetime
 
 import pandas as pd
@@ -66,7 +67,7 @@ def _data_iso(valor):
             try:
                 return datetime.datetime.strptime(texto, formato).date().isoformat()
             except Exception:
-                pass
+                logging.exception("Erro ignorado silenciosamente")
         return datetime.date.fromisoformat(texto).isoformat()
     except Exception:
         return ""

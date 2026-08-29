@@ -2,6 +2,7 @@
 Modulo de aniversariantes — cards visuais, calendario, WhatsApp manual
 e envio automatico via WhatsApp Cloud API.
 """
+import logging
 
 import os
 import json
@@ -476,7 +477,7 @@ def _preparar_df_aniv(df_cad):
             try:
                 return datetime.datetime.strptime(texto, fmt).date()
             except Exception:
-                pass
+                logging.exception("Erro ignorado silenciosamente")
 
         try:
             return datetime.date.fromisoformat(texto)

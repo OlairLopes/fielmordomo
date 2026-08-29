@@ -1,4 +1,5 @@
 """Painel do super admin â€” gerencia igrejas, planos, senhas, logos, backup e restauracao."""
+import logging
 
 import streamlit as st
 import pandas as pd
@@ -220,7 +221,7 @@ def _gerenciar_logos():
 
     if logo_sis:
         dados, ext = logo_sis
-        st.image(dados, width=200)
+        st.image(dados, width=200, caption="Logo principal do FielMordomo")
         st.caption(f"Formato atual: {ext.upper()}")
     else:
         st.info("Nenhum logo principal cadastrado ainda.")
@@ -255,7 +256,7 @@ def _gerenciar_logos():
 
     if logo_sb_sis:
         dados, ext = logo_sb_sis
-        st.image(dados, width=160)
+        st.image(dados, width=160, caption="Logo da sidebar do sistema")
         st.caption(f"Formato atual: {ext.upper()}")
     else:
         st.info("Nenhum logo de sidebar do sistema cadastrado.")
@@ -304,7 +305,7 @@ def _gerenciar_logos():
 
     if logo_ig:
         dados, ext = logo_ig
-        st.image(dados, width=200)
+        st.image(dados, width=200, caption=f"Logo principal de {ig_sel}")
         st.caption(f"Formato atual: {ext.upper()}")
     else:
         st.info(f"Nenhum logo principal cadastrado para {ig_sel}.")
@@ -341,7 +342,7 @@ def _gerenciar_logos():
 
     if logo_sb_ig:
         dados, ext = logo_sb_ig
-        st.image(dados, width=160)
+        st.image(dados, width=160, caption=f"Logo da sidebar de {ig_sel}")
         st.caption(f"Formato atual: {ext.upper()}")
     else:
         st.info(f"Nenhum logo de sidebar cadastrado para {ig_sel}.")
@@ -469,7 +470,7 @@ def _backup_admin():
                 if MASTER_DB.exists():
                     zf.writestr("master.db", MASTER_DB.read_bytes())
             except Exception:
-                pass
+                logging.exception("Erro ignorado silenciosamente")
 
             # â”€â”€ 2. LOGOS (sistema, igrejas, sidebar) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             if LOGOS_DIR.exists():
@@ -481,7 +482,7 @@ def _backup_admin():
                                 logo_file.read_bytes(),
                             )
                         except Exception:
-                            pass
+                            logging.exception("Erro ignorado silenciosamente")
 
             # â”€â”€ 3. BANCOS TENANT + CSVs por igreja â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             for _, row in df_igrejas.iterrows():
@@ -494,7 +495,7 @@ def _backup_admin():
                         df_c.to_csv(index=False, encoding="utf-8-sig"),
                     )
                 except Exception:
-                    pass
+                    logging.exception("Erro ignorado silenciosamente")
 
                 try:
                     df_l = carregar_lancamentos(slug)
@@ -510,14 +511,14 @@ def _backup_admin():
                         df_l.to_csv(index=False, encoding="utf-8-sig"),
                     )
                 except Exception:
-                    pass
+                    logging.exception("Erro ignorado silenciosamente")
 
                 try:
                     db = _tenant_db(slug)
                     if db.exists():
                         zf.writestr(f"{slug}/banco_{slug}.db", db.read_bytes())
                 except Exception:
-                    pass
+                    logging.exception("Erro ignorado silenciosamente")
 
         buf.seek(0)
         st.session_state["backup_admin_dados"] = buf.read()
