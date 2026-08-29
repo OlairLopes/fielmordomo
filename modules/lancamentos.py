@@ -153,6 +153,25 @@ def _valor_texto(valor):
     return "" if pd.isna(valor) else str(valor or "")
 
 
+def _parse_data_digitada(texto):
+    """Converte texto digitado (com ou sem barras) em data.
+
+    Aceita "29/08/2026", "29082026" ou "290826" (ano com 2 digitos).
+    Retorna None se o texto estiver vazio ou nao formar uma data valida.
+    """
+    digitos = re.sub(r"\D", "", texto or "")
+    if not digitos:
+        return None
+    if len(digitos) == 6:
+        digitos = digitos[:4] + ("20" if digitos[4:6] < "70" else "19") + digitos[4:6]
+    if len(digitos) != 8:
+        return None
+    try:
+        return datetime.datetime.strptime(digitos, "%d%m%Y").date()
+    except ValueError:
+        return None
+
+
 def _normalizar_texto_importacao(valor):
     texto = str(valor if valor is not None else "").strip().lower()
     texto = unicodedata.normalize("NFKD", texto)
@@ -968,12 +987,16 @@ def modal_novo_lancamento(slug, membros, fornec):
 
     col_data, col_tipo = st.columns(2)
     with col_data:
-        data_l = st.date_input(
+        data_l_texto = st.text_input(
             "Data",
-            value=datetime.date.today(),
-            format="DD/MM/YYYY",
+            value="",
+            placeholder="DD/MM/AAAA",
+            help="Digite com ou sem as barras. Ex.: 29082026 ou 29/08/2026.",
             key=f"mnl_data_v{ver}",
         )
+        data_l = _parse_data_digitada(data_l_texto)
+        if data_l_texto and data_l is None:
+            st.caption(":red[Data invalida.]")
     with col_tipo:
         tipo = st.selectbox("Tipo", ["Entrada", "Saida"], key=f"mnl_tipo_v{ver}")
 
@@ -1130,12 +1153,16 @@ def modal_editar_lancamento(slug, sel, membros, fornec):
     data_base = pd.to_datetime(sel["data"], errors="coerce")
     col_data, col_tipo = st.columns(2)
     with col_data:
-        data_edit = st.date_input(
+        data_edit_texto = st.text_input(
             "Data",
-            value=data_base.date() if pd.notna(data_base) else datetime.date.today(),
-            format="DD/MM/YYYY",
+            value=data_base.strftime("%d/%m/%Y") if pd.notna(data_base) else "",
+            placeholder="DD/MM/AAAA",
+            help="Digite com ou sem as barras. Ex.: 29082026 ou 29/08/2026.",
             key=kp + "data",
         )
+        data_edit = _parse_data_digitada(data_edit_texto)
+        if data_edit_texto and data_edit is None:
+            st.caption(":red[Data invalida.]")
     with col_tipo:
         tipo_opc = ["Entrada", "Saida"]
         tipo_e = st.selectbox(
