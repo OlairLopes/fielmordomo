@@ -208,7 +208,7 @@ def render():
         st.error("Sessao invalida. Faca login novamente.")
         return
 
-    st.markdown("### �?��? Dados da igreja")
+    st.markdown("### Dados da igreja")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -230,7 +230,7 @@ def render():
     )
 
     st.divider()
-    st.markdown("### ⚙�? Configuracoes da igreja")
+    st.markdown("### Configuracoes da igreja")
     st.caption("Personalize criterios usados nos relatorios, dashboard e comprovantes.")
 
     try:
@@ -283,7 +283,7 @@ Pedido:
     idx_atual = OPCOES_DIAS.index(dias_atual)
 
     with st.form("form_config_igreja"):
-        st.markdown("**�? Dizimista ativo**")
+        st.markdown("**Dizimista ativo**")
         st.caption(
             "Um membro e considerado dizimista ativo se contribuiu com dizimo "
             "nos ultimos N dias."
