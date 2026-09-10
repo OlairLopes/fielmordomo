@@ -5634,7 +5634,12 @@ def autenticar_recepcao_por_cpf4(slug, cpf4):
     if not db.exists():
         return None
 
+    chave = f"recepcao_cpf4:{slug}"
+
     with _conn(db) as conn:
+        if _autenticacao_bloqueada(conn, chave):
+            return None
+
         try:
             rows = conn.execute(
                 """SELECT r.id_recepcao, r.nome, r.usuario
@@ -5671,6 +5676,7 @@ def autenticar_recepcao_por_cpf4(slug, cpf4):
             ).fetchall()
 
         row = rows[0] if len(rows) == 1 else None
+        _registrar_resultado_login(conn, chave, row is not None)
 
     if not row:
         return None
