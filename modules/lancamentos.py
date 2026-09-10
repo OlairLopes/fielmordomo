@@ -5,6 +5,7 @@ import io
 import logging
 import os
 import re
+import time
 import unicodedata
 import urllib.parse
 
@@ -25,6 +26,8 @@ from utils.helpers import (
     slug_da_sessao, solicitar_autorizacao,
 )
 from utils.planos import tem_lancamento_lote, obter_plano, proximo_plano
+
+JANELA_DUPLICIDADE_SEGUNDOS = 15
 
 CATEGORIAS_ENTRADA = [
     "Campanha",
@@ -1120,15 +1123,38 @@ def modal_novo_lancamento(slug, membros, fornec):
             for e in erros:
                 st.error(e)
         else:
-            try:
-                inserir_lancamento(slug, lanc)
-            except Exception as ex:
-                st.error(f"Erro ao salvar: {ex}")
+            impressao = (
+                data_l.isoformat() if data_l else "",
+                tipo, cat, round(valor, 2), id_cad,
+            )
+            chave_dup = _sk("ultimo_lanc", slug)
+            anterior = st.session_state.get(chave_dup)
+            duplicado = (
+                anterior is not None
+                and anterior["impressao"] == impressao
+                and time.monotonic() - anterior["quando"] < JANELA_DUPLICIDADE_SEGUNDOS
+            )
+            if duplicado:
+                st.warning(
+                    "⚠️ Este lancamento parece identico ao que voce acabou de "
+                    "salvar (mesma data, tipo, categoria, valor e vinculo). "
+                    "Para evitar duplicidade, aguarde alguns segundos antes de "
+                    "salvar novamente se realmente forem lancamentos distintos."
+                )
             else:
-                _invalida()
-                st.session_state["mnl_ver"] += 1
-                st.toast("✅ Lancamento salvo!")
-                st.rerun()
+                try:
+                    with st.spinner("Salvando lancamento..."):
+                        inserir_lancamento(slug, lanc)
+                except Exception as ex:
+                    st.error(f"Erro ao salvar: {ex}")
+                else:
+                    st.session_state[chave_dup] = {
+                        "impressao": impressao, "quando": time.monotonic(),
+                    }
+                    _invalida()
+                    st.session_state["mnl_ver"] += 1
+                    st.toast("✅ Lancamento salvo!")
+                    st.rerun()
 
 
 # ═══════════════════════════════════════════════════════════════════════
