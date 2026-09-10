@@ -7697,17 +7697,21 @@ def autenticar_leitor_biblia(slug, telefone, senha):
     db = _tenant_db(slug)
     if not db.exists():
         return None
+
+    chave = f"leitor_biblia:{slug}:{telefone_norm}"
+
     with _conn(db) as conn:
         _garantir_tabela_leitores_biblia(conn)
+        if _autenticacao_bloqueada(conn, chave):
+            return None
         row = conn.execute(
             """SELECT id_leitor, nome, senha_hash FROM leitores_biblia
                WHERE telefone=? LIMIT 1""",
             (telefone_norm,),
         ).fetchone()
-        if not row or not row["senha_hash"]:
-            return None
-        valido, precisa_migrar = _verificar_senha(senha, row["senha_hash"])
-        if not valido:
+        valido, precisa_migrar = _verificar_senha(senha, row["senha_hash"] if row else "")
+        _registrar_resultado_login(conn, chave, valido)
+        if not row or not valido:
             return None
         if precisa_migrar:
             conn.execute(
