@@ -2206,20 +2206,20 @@ def render():
             "Acesse somente quando necessario e nao compartilhe exportacoes sem autorizacao."
         )
 
-        _render_insight_topo(insight_texto)
-
-        a1, a2, a3 = st.columns(3)
-        with a1: _card("Entradas YTD", formatar_moeda(ent_ytd), f"{_variacao(ent_ytd, ent_ytd_ant)} vs mesmo periodo anterior")
-        with a2: _card("Saidas YTD", formatar_moeda(sai_ytd))
-        with a3: _card("Saldo YTD", formatar_moeda(saldo_ytd))
-
-        _secao_dashboard(
-            "Ticket medio e potencial de arrecadacao",
-            "Analise do valor medio por dizimista e do potencial de arrecadacao vs realizado.",
-        )
-        _render_ticket_medio_gap(ticket_info)
-
         if _autorizacao_pastoral(slug):
+            _render_insight_topo(insight_texto)
+
+            a1, a2, a3 = st.columns(3)
+            with a1: _card("Entradas YTD", formatar_moeda(ent_ytd), f"{_variacao(ent_ytd, ent_ytd_ant)} vs mesmo periodo anterior")
+            with a2: _card("Saidas YTD", formatar_moeda(sai_ytd))
+            with a3: _card("Saldo YTD", formatar_moeda(saldo_ytd))
+
+            _secao_dashboard(
+                "Ticket medio e potencial de arrecadacao",
+                "Analise do valor medio por dizimista e do potencial de arrecadacao vs realizado.",
+            )
+            _render_ticket_medio_gap(ticket_info)
+
             # ═══ Saude financeira (transferido da antiga aba Saude Financeira) ═══
             _secao_dashboard(
                 "Score de saude financeira",
