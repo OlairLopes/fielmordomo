@@ -550,7 +550,7 @@ def _backup_admin():
 
     if "backup_admin_dados" in st.session_state:
         tam_mb = len(st.session_state["backup_admin_dados"]) / (1024 * 1024)
-        st.success(f"âœ… Backup pronto ({tam_mb:.2f} MB)")
+        st.success(f"✅ Backup pronto ({tam_mb:.2f} MB)")
         st.download_button(
             "📥 Baixar backup completo",
             data=st.session_state["backup_admin_dados"],
@@ -564,7 +564,7 @@ def _backup_admin():
     st.divider()
 
     # ═══ RESTAURAR BACKUP ════════════════════════════════════════════════
-    st.markdown("#### â™»ï¸ Restaurar backup completo")
+    st.markdown("#### ♻️ Restaurar backup completo")
     st.caption(
         "Envie o arquivo ZIP de backup. O sistema restaurara tudo: "
         "tenants, master.db, logos e configuracoes. "
@@ -572,7 +572,7 @@ def _backup_admin():
     )
 
     st.warning(
-        "âš ï¸ **Atencao:** esta operacao sobrescreve dados atuais do sistema "
+        "⚠️ **Atencao:** esta operacao sobrescreve dados atuais do sistema "
         "(igrejas, senhas, planos, configuracoes, logos e subcategorias). "
         "Bancos atuais sao salvos automaticamente em `backups/` no servidor."
     )
@@ -597,7 +597,7 @@ def _backup_admin():
 
         with col_r1:
             confirmar_restauracao = st.button(
-                "âœ… Restaurar agora",
+                "✅ Restaurar agora",
                 type="primary",
                 key="btn_confirmar_restauracao",
                 use_container_width=True,
@@ -605,7 +605,7 @@ def _backup_admin():
 
         with col_r2:
             if st.button(
-                "âŒ Cancelar",
+                "❌ Cancelar",
                 key="btn_cancelar_restauracao",
                 use_container_width=True,
             ):
@@ -652,7 +652,7 @@ def _backup_admin():
             # Igrejas recriadas (placeholder)
             if resultado["igrejas_recriadas"]:
                 st.info(
-                    f"â„¹ï¸ **{len(resultado['igrejas_recriadas'])} igreja(s) recriada(s) no sistema:**"
+                    f"ℹ️ **{len(resultado['igrejas_recriadas'])} igreja(s) recriada(s) no sistema:**"
                 )
                 with st.expander("Ver detalhes", expanded=False):
                     st.caption(
@@ -666,11 +666,11 @@ def _backup_admin():
             # Erros
             if resultado["erros"]:
                 st.error(
-                    f"âš ï¸ **{len(resultado['erros'])} erro(s) durante a restauracao:**"
+                    f"⚠️ **{len(resultado['erros'])} erro(s) durante a restauracao:**"
                 )
                 with st.expander("Ver erros", expanded=True):
                     for erro in resultado["erros"]:
-                        st.markdown(f"- âŒ {erro}")
+                        st.markdown(f"- ❌ {erro}")
 
             if total_ok == 0 and not resultado["erros"]:
                 st.warning("Nenhum item restaurado. Verifique o arquivo ZIP.")
