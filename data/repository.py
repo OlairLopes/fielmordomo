@@ -26,6 +26,10 @@ _PD_READ_SQL_QUERY = getattr(pd, "read_sql_query")
 PBKDF2_ITERACOES = 210_000
 SENHA_MIN_CARACTERES = 15
 SENHA_MAX_CARACTERES = 128
+# Login dos leitores do plano de leitura biblica: conta de baixa sensibilidade
+# (so confirma leituras diarias, sem acesso a dados financeiros/membros), por
+# isso usa uma senha minima bem mais curta que a dos perfis administrativos.
+SENHA_LEITOR_MIN_CARACTERES = 6
 TAMANHO_MAXIMO_LOGO = 5 * 1024 * 1024
 TAMANHO_MAXIMO_ZIP = 100 * 1024 * 1024
 TAMANHO_MAXIMO_ARQUIVOS_ZIP = 500 * 1024 * 1024
@@ -143,6 +147,23 @@ def validar_nova_senha(senha: str) -> list[str]:
     if len(senha) < SENHA_MIN_CARACTERES:
         erros.append(
             f"A senha deve possuir ao menos {SENHA_MIN_CARACTERES} caracteres."
+        )
+    if len(senha) > SENHA_MAX_CARACTERES:
+        erros.append(
+            f"A senha deve possuir no maximo {SENHA_MAX_CARACTERES} caracteres."
+        )
+    return erros
+
+
+def _validar_senha_leitor_biblia(senha: str) -> list[str]:
+    """Validacao de senha para o login dos leitores do plano de leitura biblica
+    (conta de baixa sensibilidade, senha minima mais curta que a administrativa)."""
+    erros = []
+    if not isinstance(senha, str):
+        return ["Senha invalida."]
+    if len(senha) < SENHA_LEITOR_MIN_CARACTERES:
+        erros.append(
+            f"A senha deve possuir ao menos {SENHA_LEITOR_MIN_CARACTERES} caracteres."
         )
     if len(senha) > SENHA_MAX_CARACTERES:
         erros.append(
@@ -7544,18 +7565,24 @@ def _garantir_tabela_leitores_biblia(conn):
                 FROM leitores_biblia_old;
                 DROP TABLE leitores_biblia_old;
             """)
-            return
-    conn.executescript("""
-        CREATE TABLE IF NOT EXISTS leitores_biblia (
-            id_leitor       INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome            TEXT NOT NULL,
-            cpf             TEXT,
-            data_nascimento TEXT,
-            telefone        TEXT DEFAULT '',
-            criado_em       TEXT NOT NULL DEFAULT (datetime('now')),
-            UNIQUE(cpf, data_nascimento)
-        );
-    """)
+    else:
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS leitores_biblia (
+                id_leitor       INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome            TEXT NOT NULL,
+                cpf             TEXT,
+                data_nascimento TEXT,
+                telefone        TEXT DEFAULT '',
+                criado_em       TEXT NOT NULL DEFAULT (datetime('now')),
+                UNIQUE(cpf, data_nascimento)
+            );
+        """)
+
+    # Login proprio do leitor (usuario = telefone, com senha). Coluna adicionada
+    # depois da criacao original da tabela, por isso o ALTER TABLE em separado.
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(leitores_biblia)").fetchall()]
+    if "senha_hash" not in cols:
+        conn.execute("ALTER TABLE leitores_biblia ADD COLUMN senha_hash TEXT DEFAULT ''")
 
 
 def _normalizar_telefone_leitor(tel):
@@ -7567,17 +7594,21 @@ def _normalizar_telefone_leitor(tel):
     return digitos
 
 
-def cadastrar_leitor_biblia(slug, nome, cpf, data_nascimento, telefone=""):
-    """Cria um leitor avulso (sem vinculo com a membresia) para o plano de leitura biblica."""
+def cadastrar_leitor_biblia(slug, nome, telefone, senha, cpf="", data_nascimento=""):
+    """Cria um leitor avulso (sem vinculo com a membresia) para o plano de leitura
+    biblica, com login proprio: usuario = numero de WhatsApp, autenticado por senha."""
+    nome = sanitizar(nome)
+    telefone_norm = _normalizar_telefone_leitor(telefone)
     cpf_limpo = "".join(c for c in str(cpf or "") if c.isdigit())
     data_nascimento = str(data_nascimento or "").strip()
-    nome = sanitizar(nome)
+
     if not nome:
         raise ValueError("Nome e obrigatorio.")
-    if len(cpf_limpo) != 11:
-        raise ValueError("CPF invalido.")
-    if not data_nascimento:
-        raise ValueError("Data de nascimento e obrigatoria.")
+    if not telefone_norm:
+        raise ValueError("Numero de WhatsApp invalido.")
+    erros_senha = _validar_senha_leitor_biblia(senha)
+    if erros_senha:
+        raise ValueError(" ".join(erros_senha))
 
     db = _tenant_db(slug)
     if not db.exists():
@@ -7585,18 +7616,107 @@ def cadastrar_leitor_biblia(slug, nome, cpf, data_nascimento, telefone=""):
     with _conn(db) as conn:
         _garantir_tabela_leitores_biblia(conn)
         existente = conn.execute(
-            "SELECT id_leitor FROM leitores_biblia WHERE cpf=? AND data_nascimento=?",
-            (cpf_limpo, data_nascimento),
+            "SELECT id_leitor FROM leitores_biblia WHERE telefone=?",
+            (telefone_norm,),
         ).fetchone()
         if existente:
-            raise ValueError("Ja existe um cadastro de leitor com esse CPF e data de nascimento.")
+            raise ValueError(
+                "Ja existe um cadastro de leitor com esse numero de WhatsApp. "
+                "Use a opcao de login."
+            )
         cur = conn.execute(
-            """INSERT INTO leitores_biblia (nome, cpf, data_nascimento, telefone)
-               VALUES (?, ?, ?, ?)""",
-            (nome, cpf_limpo, data_nascimento, sanitizar(telefone or "")),
+            """INSERT INTO leitores_biblia
+                   (nome, cpf, data_nascimento, telefone, senha_hash)
+               VALUES (?, ?, ?, ?, ?)""",
+            (nome, cpf_limpo or None, data_nascimento or None, telefone_norm, hash_senha(senha)),
         )
         id_leitor = cur.lastrowid
-    return {"id_leitor": id_leitor, "nome": nome, "cpf": cpf_limpo, "data_nascimento": data_nascimento}
+    return {"id_leitor": id_leitor, "nome": nome, "telefone": telefone_norm}
+
+
+def leitor_biblia_precisa_definir_senha(slug, telefone):
+    """True se ja existe um leitor avulso com esse telefone mas sem senha
+    cadastrada (por exemplo, importado em lote pela secretaria)."""
+    leitor = localizar_leitor_biblia_por_telefone(slug, telefone)
+    return bool(leitor) and not leitor.get("senha_hash")
+
+
+def definir_senha_leitor_biblia(slug, telefone, senha):
+    """Define a senha de login de um leitor avulso ja existente que ainda nao
+    possui senha (por exemplo, importado em lote). Retorna o cadastro no
+    mesmo formato de localizar_leitor_plano_biblico, ou levanta ValueError."""
+    telefone_norm = _normalizar_telefone_leitor(telefone)
+    if not telefone_norm:
+        raise ValueError("Informe o numero de WhatsApp.")
+    erros = _validar_senha_leitor_biblia(senha)
+    if erros:
+        raise ValueError(" ".join(erros))
+
+    db = _tenant_db(slug)
+    if not db.exists():
+        raise ValueError("Numero nao encontrado. Confira com a secretaria da igreja.")
+    with _conn(db) as conn:
+        _garantir_tabela_leitores_biblia(conn)
+        row = conn.execute(
+            "SELECT id_leitor, nome, senha_hash FROM leitores_biblia WHERE telefone=? LIMIT 1",
+            (telefone_norm,),
+        ).fetchone()
+        if not row:
+            raise ValueError("Numero nao encontrado. Confira com a secretaria da igreja.")
+        if row["senha_hash"]:
+            raise ValueError("Esse numero ja possui senha cadastrada. Faca login normalmente.")
+        conn.execute(
+            "UPDATE leitores_biblia SET senha_hash=? WHERE id_leitor=?",
+            (hash_senha(senha), row["id_leitor"]),
+        )
+        id_leitor, nome = row["id_leitor"], row["nome"]
+
+    igreja = buscar_igreja_por_slug(slug)
+    return {
+        "origem": "leitor",
+        "id_pessoa": id_leitor,
+        "nome": nome,
+        "igreja_nome": (igreja or {}).get("nome", ""),
+    }
+
+
+def autenticar_leitor_biblia(slug, telefone, senha):
+    """Autentica um leitor avulso pelo login proprio (telefone + senha).
+    Retorna o cadastro no mesmo formato de localizar_leitor_plano_biblico,
+    ou None se as credenciais forem invalidas ou a senha ainda nao existir."""
+    telefone_norm = _normalizar_telefone_leitor(telefone)
+    if not telefone_norm or not senha:
+        return None
+
+    db = _tenant_db(slug)
+    if not db.exists():
+        return None
+    with _conn(db) as conn:
+        _garantir_tabela_leitores_biblia(conn)
+        row = conn.execute(
+            """SELECT id_leitor, nome, senha_hash FROM leitores_biblia
+               WHERE telefone=? LIMIT 1""",
+            (telefone_norm,),
+        ).fetchone()
+        if not row or not row["senha_hash"]:
+            return None
+        valido, precisa_migrar = _verificar_senha(senha, row["senha_hash"])
+        if not valido:
+            return None
+        if precisa_migrar:
+            conn.execute(
+                "UPDATE leitores_biblia SET senha_hash=? WHERE id_leitor=?",
+                (hash_senha(senha), row["id_leitor"]),
+            )
+        id_leitor, nome = row["id_leitor"], row["nome"]
+
+    igreja = buscar_igreja_por_slug(slug)
+    return {
+        "origem": "leitor",
+        "id_pessoa": id_leitor,
+        "nome": nome,
+        "igreja_nome": (igreja or {}).get("nome", ""),
+    }
 
 
 def localizar_leitor_biblia(slug, cpf, data_nascimento):
@@ -7653,7 +7773,7 @@ def localizar_leitor_biblia_por_telefone(slug, telefone):
     with _conn(db) as conn:
         _garantir_tabela_leitores_biblia(conn)
         row = conn.execute(
-            """SELECT id_leitor, nome, telefone FROM leitores_biblia
+            """SELECT id_leitor, nome, telefone, senha_hash FROM leitores_biblia
                WHERE telefone=? LIMIT 1""",
             (telefone_norm,),
         ).fetchone()

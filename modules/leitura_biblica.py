@@ -10,15 +10,17 @@ import streamlit as st
 
 from data.repository import (
     PLANO_LEITURA_PADRAO,
+    autenticar_leitor_biblia,
     cadastrar_leitor_biblia,
     carregar_cadastros,
     confirmar_leitura_biblica,
+    definir_senha_leitor_biblia,
     importar_leitores_biblia_em_lote,
+    leitor_biblia_precisa_definir_senha,
     leitura_ja_confirmada,
     listar_igrejas,
     listar_planos_leitura_biblica,
     localizar_leitor_plano_biblico,
-    localizar_leitor_plano_biblico_por_telefone,
     obter_capitulo_biblico_cache,
     obter_leitura_do_dia,
     salvar_capitulo_biblico_cache,
@@ -314,50 +316,12 @@ def _selecionar_igreja_publica():
     return slug
 
 
-def _identificar_leitor_por_telefone(slug):
+def _identificar_membro(slug):
     st.caption(
-        "Digite o mesmo número de WhatsApp que a igreja cadastrou para você."
+        "Para membros já cadastrados na igreja. Se você não é membro, use a "
+        "aba de login ou cadastro de leitor."
     )
-    with st.form("form_identificar_leitor_telefone"):
-        telefone = st.text_input("Número de WhatsApp", placeholder="Ex.: (11) 99999-8888")
-        confirmar = st.form_submit_button("Continuar", type="primary")
-
-    if not confirmar:
-        return
-
-    if not telefone.strip():
-        st.error("Informe o número de WhatsApp.")
-        return
-
-    cadastro = localizar_leitor_plano_biblico_por_telefone(slug, telefone)
-    if not cadastro:
-        st.error(
-            "Número não encontrado. Confira com a secretaria da igreja ou "
-            "identifique-se com nome, CPF e data de nascimento."
-        )
-        return
-
-    st.session_state["leitura_cadastro"] = cadastro
-    st.rerun()
-
-
-def _identificar_leitor(slug):
-    st.markdown("#### Cadastre-se para confirmar sua leitura")
-    modo = st.radio(
-        "Como você quer se identificar?",
-        ["Nome, CPF e data de nascimento", "Fui cadastrado pela igreja (WhatsApp)"],
-        key="leitura_modo_identificacao",
-    )
-    if modo == "Fui cadastrado pela igreja (WhatsApp)":
-        _identificar_leitor_por_telefone(slug)
-        return
-
-    st.caption(
-        "Membros cadastrados são reconhecidos automaticamente. Se você ainda não "
-        "é membro, esse cadastro cria seu acesso como leitor do plano."
-    )
-    with st.form("form_identificar_leitor_leitura"):
-        nome = st.text_input("Nome completo")
+    with st.form("form_identificar_membro_leitura"):
         c1, c2 = st.columns(2)
         cpf = c1.text_input("CPF")
         data_nascimento_txt = c2.text_input(
@@ -369,21 +333,108 @@ def _identificar_leitor(slug):
         return
 
     data_nascimento = _parse_data_nascimento(data_nascimento_txt)
-    if not nome.strip() or not cpf or not data_nascimento:
-        st.error("Informe nome, CPF e data de nascimento válidos.")
+    if not cpf or not data_nascimento:
+        st.error("Informe CPF e data de nascimento válidos.")
         return
 
     cadastro = localizar_leitor_plano_biblico(slug, cpf, data_nascimento)
     if not cadastro:
-        try:
-            cadastrar_leitor_biblia(slug, nome, cpf, data_nascimento)
-        except ValueError as erro:
-            st.error(str(erro))
-            return
-        cadastro = localizar_leitor_plano_biblico(slug, cpf, data_nascimento)
+        st.error(
+            "Cadastro não encontrado. Confira o CPF e a data de nascimento, "
+            "ou use a aba de login/cadastro de leitor se você não é membro."
+        )
+        return
 
     st.session_state["leitura_cadastro"] = cadastro
     st.rerun()
+
+
+def _login_leitor(slug):
+    st.caption(
+        "Use o número de WhatsApp cadastrado. Se a igreja te cadastrou em lote e "
+        "esta é sua primeira vez aqui, escolha uma senha abaixo para criar seu acesso."
+    )
+    with st.form("form_login_leitor"):
+        telefone = st.text_input("Número de WhatsApp", placeholder="Ex.: (11) 99999-8888")
+        senha = st.text_input("Senha", type="password")
+        confirmar = st.form_submit_button("Entrar", type="primary")
+
+    if not confirmar:
+        return
+
+    if not telefone.strip() or not senha:
+        st.error("Informe o número de WhatsApp e a senha.")
+        return
+
+    if leitor_biblia_precisa_definir_senha(slug, telefone):
+        try:
+            cadastro = definir_senha_leitor_biblia(slug, telefone, senha)
+        except ValueError as erro:
+            st.error(str(erro))
+            return
+        st.session_state["leitura_cadastro"] = cadastro
+        st.success("Senha criada com sucesso! Use-a para entrar da próxima vez.")
+        st.rerun()
+
+    cadastro = autenticar_leitor_biblia(slug, telefone, senha)
+    if not cadastro:
+        st.error(
+            "Número ou senha incorretos. Se você ainda não tem cadastro, use a "
+            "aba \"Ainda não tenho cadastro\"."
+        )
+        return
+
+    st.session_state["leitura_cadastro"] = cadastro
+    st.rerun()
+
+
+def _cadastro_leitor(slug):
+    st.caption(
+        "Crie seu acesso de leitor com um número de WhatsApp e uma senha. "
+        "Você usa essas mesmas credenciais para entrar nas próximas vezes."
+    )
+    with st.form("form_cadastro_leitor"):
+        nome = st.text_input("Nome completo")
+        telefone = st.text_input("Número de WhatsApp", placeholder="Ex.: (11) 99999-8888")
+        c1, c2 = st.columns(2)
+        senha = c1.text_input("Senha", type="password")
+        confirmar_senha = c2.text_input("Confirmar senha", type="password")
+        confirmar = st.form_submit_button("Criar cadastro", type="primary")
+
+    if not confirmar:
+        return
+
+    if not nome.strip() or not telefone.strip() or not senha:
+        st.error("Informe nome, número de WhatsApp e senha.")
+        return
+    if senha != confirmar_senha:
+        st.error("As senhas informadas não coincidem.")
+        return
+
+    try:
+        cadastrar_leitor_biblia(slug, nome, telefone, senha)
+    except ValueError as erro:
+        st.error(str(erro))
+        return
+
+    cadastro = autenticar_leitor_biblia(slug, telefone, senha)
+    st.session_state["leitura_cadastro"] = cadastro
+    st.rerun()
+
+
+def _identificar_leitor(slug):
+    st.markdown("#### Entre ou cadastre-se para confirmar sua leitura")
+    modo = st.radio(
+        "Como você quer acessar?",
+        ["Já tenho login de leitor", "Ainda não tenho cadastro", "Sou membro cadastrado"],
+        key="leitura_modo_identificacao",
+    )
+    if modo == "Já tenho login de leitor":
+        _login_leitor(slug)
+    elif modo == "Ainda não tenho cadastro":
+        _cadastro_leitor(slug)
+    else:
+        _identificar_membro(slug)
 
 
 def render_importar_leitores(slug):
