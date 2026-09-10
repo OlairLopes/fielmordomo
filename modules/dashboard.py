@@ -937,7 +937,8 @@ def _render_saude_financeira(df, mes_ref, slug):
 
     _secao_dashboard(
         "Saude financeira",
-        "Indicadores para apoio a decisao. A projecao utiliza os lancamentos registrados e a media dos ultimos tres meses.",
+        "Indicadores para apoio a decisao, calculados com base nos lancamentos registrados "
+        "e na media dos ultimos tres meses.",
     )
     s1, s2, s3, s4 = st.columns(4)
     with s1:
@@ -963,33 +964,10 @@ def _render_saude_financeira(df, mes_ref, slug):
             )
     else:
         st.success("Nenhum alerta financeiro relevante foi identificado.")
-
-    _secao_dashboard(
-        "Projecao de caixa",
-        "Estimativa baseada no saldo acumulado registrado e no resultado medio mensal recente.",
-    )
-    projecoes = saude["projecoes"]
-    fig_projecao = go.Figure(go.Bar(
-        x=projecoes["Horizonte"],
-        y=projecoes["Saldo projetado"],
-        marker_color=[
-            CORES["entrada"] if valor >= 0 else CORES["saida"]
-            for valor in projecoes["Saldo projetado"]
-        ],
-        text=[formatar_moeda(valor) for valor in projecoes["Saldo projetado"]],
-        textposition="outside",
-        textfont=dict(size=11, color="#475569"),
-    ))
-    fig_projecao.update_layout(**_layout_grafico(
-        altura=340,
-        xaxis=dict(fixedrange=True, showgrid=False),
-        yaxis=dict(fixedrange=True, gridcolor="#E2E8F0", tickformat=",.0f"),
-    ))
-    st.plotly_chart(fig_projecao, use_container_width=True, config=CONFIG_PLOTLY)
     st.caption(
         f"Saldo acumulado registrado ate {_mes_label(mes_ref)}: "
         f"{formatar_moeda(saude['saldo_acumulado'])}. "
-        "A projecao nao substitui conciliacao bancaria nem planejamento orcamentario."
+        "A previsao detalhada dos proximos meses esta na secao 'Previsao' abaixo."
     )
 
 
@@ -1023,21 +1001,6 @@ def _resumo_acompanhamento(membros, dizimos, hoje, dias_ativo):
             "percentual": (quantidade / total * 100) if total else 0.0,
         })
     return resumo
-
-
-def _frequencia_membros(membros, dizimos):
-    contagem = dizimos.groupby("id_cadastro").size().to_dict() if not dizimos.empty else {}
-    valores = dizimos.groupby("id_cadastro")["valor"].sum().to_dict() if not dizimos.empty else {}
-    linhas = []
-    for _, membro in membros.sort_values("nome").iterrows():
-        id_cadastro = int(membro["id_cadastro"])
-        linhas.append({
-            "ID": id_cadastro,
-            "Nome": membro["nome"],
-            "Contribuicoes": int(contagem.get(id_cadastro, 0)),
-            "Valor total": float(valores.get(id_cadastro, 0.0)),
-        })
-    return pd.DataFrame(linhas)
 
 
 def _meses_periodo(inicio, fim):
@@ -2256,26 +2219,6 @@ def render():
         )
         _render_ticket_medio_gap(ticket_info)
 
-        # ═══ Botao de exportacao executiva ═══
-        col_btn_exp, _ = st.columns([1, 3])
-        with col_btn_exp:
-            if st.button("📄 Exportar relatorio executivo", key=_sk("btn_export_exec", slug),
-                         use_container_width=True):
-                html_relatorio = _gerar_html_relatorio_executivo(
-                    igreja, slug, inicio_mes, fim_mes, ent, sai, saldo,
-                    ticket_info, score, saude_info, insight_texto,
-                )
-                st.session_state[_sk("html_export", slug)] = html_relatorio
-
-        if _sk("html_export", slug) in st.session_state:
-            st.download_button(
-                "⬇️ Baixar relatorio (HTML - abra no navegador e imprima como PDF)",
-                data=st.session_state[_sk("html_export", slug)],
-                file_name=f"relatorio_executivo_{inicio_mes:%Y%m%d}_{fim_mes:%Y%m%d}.html",
-                mime="text/html",
-                key=_sk("dl_export", slug),
-            )
-
         if _autorizacao_pastoral(slug):
             # ═══ Saude financeira (transferido da antiga aba Saude Financeira) ═══
             _secao_dashboard(
@@ -2300,13 +2243,26 @@ def render():
 
             _render_saude_financeira(df, mes_ref, slug)
 
-            _secao_dashboard(
-                "Alerta de churn (dizimistas afastando-se)",
-                "Membros que contribuiram nos ultimos 90 dias mas nao contribuiram "
-                "no mes de referencia. Impacto financeiro estimado.",
-            )
-            churn_info = _identificar_churn(df, mes_ref, membros, dias_referencia=90)
-            _render_churn_alerta(churn_info, slug, igreja, mes_ref)
+            # ═══ Botao de exportacao executiva (contem Score e Saude financeira,
+            # por isso fica atras da senha do acompanhamento pastoral) ═══
+            col_btn_exp, _ = st.columns([1, 3])
+            with col_btn_exp:
+                if st.button("📄 Exportar relatorio executivo", key=_sk("btn_export_exec", slug),
+                             use_container_width=True):
+                    html_relatorio = _gerar_html_relatorio_executivo(
+                        igreja, slug, inicio_mes, fim_mes, ent, sai, saldo,
+                        ticket_info, score, saude_info, insight_texto,
+                    )
+                    st.session_state[_sk("html_export", slug)] = html_relatorio
+
+            if _sk("html_export", slug) in st.session_state:
+                st.download_button(
+                    "⬇️ Baixar relatorio (HTML - abra no navegador e imprima como PDF)",
+                    data=st.session_state[_sk("html_export", slug)],
+                    file_name=f"relatorio_executivo_{inicio_mes:%Y%m%d}_{fim_mes:%Y%m%d}.html",
+                    mime="text/html",
+                    key=_sk("dl_export", slug),
+                )
 
             _secao_dashboard(
                 "Previsao (proximos 3 meses)",
@@ -2555,6 +2511,14 @@ def render():
             _render_cruzamento_geo(df_cruzamento)
 
             _secao_dashboard(
+                "Alerta de churn (dizimistas afastando-se)",
+                "Membros que contribuiram nos ultimos 90 dias mas nao contribuiram "
+                "no mes de referencia. Impacto financeiro estimado.",
+            )
+            churn_info = _identificar_churn(df, mes_ref, membros, dias_referencia=90)
+            _render_churn_alerta(churn_info, slug, igreja, mes_ref)
+
+            _secao_dashboard(
                 "Membros que requerem acompanhamento",
                 f"Criterio configurado: dizimista ativo quando contribuiu nos ultimos {dias_ativo} dias.",
             )
@@ -2629,46 +2593,6 @@ def render():
                 p3.metric("Sem contribuicao no periodo", nao_dizimistas)
             else:
                 st.info("Nao ha membros ativos cadastrados.")
-
-            _secao_dashboard(
-                "Frequencia de contribuicoes",
-                "Quantidade de registros por membro no periodo analisado. O grafico exibe somente quem contribuiu.",
-            )
-            frequencia = _frequencia_membros(membros, dizimos_periodo)
-            if frequencia.empty:
-                st.info("Nao ha membros ativos para exibir.")
-            else:
-                grafico_freq = frequencia[frequencia["Contribuicoes"] > 0].sort_values(
-                    ["Contribuicoes", "Nome"],
-                    ascending=[True, False],
-                )
-                if grafico_freq.empty:
-                    st.info("Nenhum membro registrou contribuicao no periodo analisado.")
-                else:
-                    fig_freq = go.Figure(go.Bar(
-                        x=grafico_freq["Contribuicoes"],
-                        y=grafico_freq["Nome"],
-                        orientation="h",
-                        marker_color=CORES["entrada"],
-                        text=[str(quantidade) for quantidade in grafico_freq["Contribuicoes"]],
-                        textposition="outside",
-                        textfont=dict(size=10, color="#475569"),
-                    ))
-                    fig_freq.update_layout(**_layout_grafico(
-                        altura=max(340, len(grafico_freq) * 30 + 100),
-                        xaxis=dict(fixedrange=True, showgrid=False, showticklabels=False),
-                        yaxis=dict(fixedrange=True, showgrid=False),
-                    ))
-                    st.plotly_chart(fig_freq, use_container_width=True, config=CONFIG_PLOTLY)
-                freq_exportacao = frequencia.copy()
-                freq_exportacao["Valor total"] = freq_exportacao["Valor total"].apply(formatar_moeda)
-                st.download_button(
-                    "Exportar lista completa de frequencia",
-                    gerar_csv(freq_exportacao),
-                    "frequencia_dizimos_periodo.csv",
-                    "text/csv",
-                    key=_sk("csv_frequencia", slug),
-                )
 
             _secao_dashboard(
                 "Consulta individual",
