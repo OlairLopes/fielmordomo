@@ -182,6 +182,13 @@ def _auth():
     return _importar("modules.auth")
 
 
+def _iniciar_agendador_backup():
+    try:
+        _importar("utils.backup_scheduler").iniciar_agendador_backup()
+    except Exception:
+        LOGGER.exception("Nao foi possivel iniciar o agendador de backup automatico.")
+
+
 def _validar_contrato_auth(auth):
     funcoes_obrigatorias = ("tela_login", "modo_atual", "logout")
     ausentes = [
@@ -1031,6 +1038,7 @@ def _aplicar_tipografia():
 
 
 def main():
+    _iniciar_agendador_backup()
     _ocultar_chrome_streamlit()
     _aplicar_tipografia()
     _bloquear_acesso_fora_do_dominio_oficial()

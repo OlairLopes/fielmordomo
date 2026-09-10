@@ -14,6 +14,7 @@ from data.repository import (
     exportar_backup_igreja,
     restaurar_backup_igreja,
 )
+from utils.backup_scheduler import HORA_EXECUCAO, listar_backups_automaticos
 from utils.helpers import formatar_moeda, slug_da_sessao, solicitar_autorizacao
 from utils.planos import obter_plano, tem_backup_automatico
 
@@ -156,6 +157,43 @@ def _render_resumo(slug):
     c4.metric("Resultado registrado", formatar_moeda(entradas - saidas))
 
 
+def _render_backup_automatico(slug, plano):
+    p_info = obter_plano(plano)
+    if not tem_backup_automatico(plano):
+        st.caption(
+            f"O plano {p_info['nome']} possui backup manual. "
+            "Backups automaticos diarios estao disponiveis nos planos Profissional e Premium."
+        )
+        return
+
+    st.markdown("#### Backup automatico")
+    backups = listar_backups_automaticos(slug)
+    if not backups:
+        st.info(
+            f"Seu plano inclui backup automatico diario (gerado por volta das "
+            f"{HORA_EXECUCAO}h, horario de Brasilia). Ainda nao foi gerado o "
+            "primeiro backup automatico desta igreja."
+        )
+        return
+
+    ultimo_ts, _ = backups[0]
+    st.success(
+        f"Backup automatico ativo. Ultimo backup: "
+        f"{ultimo_ts.strftime('%d/%m/%Y %H:%M')} (horario de Brasilia)."
+    )
+    with st.expander(f"Backups automaticos recentes ({len(backups)})", expanded=False):
+        for ts, arquivo in backups:
+            c_data, c_baixar = st.columns([3, 1])
+            c_data.caption(ts.strftime("%d/%m/%Y %H:%M"))
+            c_baixar.download_button(
+                "Baixar",
+                data=arquivo.read_bytes(),
+                file_name=arquivo.name,
+                mime="application/zip",
+                key=_sk(f"baixar_auto_{arquivo.stem}", slug),
+            )
+
+
 def render():
     slug = slug_da_sessao()
     if not slug:
@@ -171,14 +209,4 @@ def render():
     st.divider()
     _render_restauracao(slug)
     st.divider()
-    p_info = obter_plano(plano)
-    if tem_backup_automatico(plano):
-        st.info(
-            "Seu plano permite backup automatico. Configure uma rotina agendada "
-            "no ambiente de hospedagem para armazenar copias fora da aplicacao."
-        )
-    else:
-        st.caption(
-            f"O plano {p_info['nome']} possui backup manual. "
-            "Backups automaticos devem ser configurados em planos habilitados."
-        )
+    _render_backup_automatico(slug, plano)
