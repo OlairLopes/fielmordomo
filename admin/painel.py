@@ -463,16 +463,18 @@ def _backup_admin():
 
     if st.button("Gerar backup completo", type="primary", key="btn_backup_admin"):
         buf = io.BytesIO()
+        falhas = []
 
         with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-            # â”€â”€ 1. MASTER.DB (senhas, planos, configs, subcategorias) â”€â”€â”€â”€
+            # ─── 1. MASTER.DB (senhas, planos, configs, subcategorias) ────
             try:
                 if MASTER_DB.exists():
                     zf.writestr("master.db", MASTER_DB.read_bytes())
-            except Exception:
-                logging.exception("Erro ignorado silenciosamente")
+            except Exception as exc:
+                logging.exception("Falha ao incluir master.db no backup completo.")
+                falhas.append(("master.db", str(exc)))
 
-            # â”€â”€ 2. LOGOS (sistema, igrejas, sidebar) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            # ─── 2. LOGOS (sistema, igrejas, sidebar) ──────────────────────
             if LOGOS_DIR.exists():
                 for logo_file in LOGOS_DIR.glob("*"):
                     if logo_file.is_file():
@@ -481,10 +483,11 @@ def _backup_admin():
                                 f"logos/{logo_file.name}",
                                 logo_file.read_bytes(),
                             )
-                        except Exception:
-                            logging.exception("Erro ignorado silenciosamente")
+                        except Exception as exc:
+                            logging.exception("Falha ao incluir logo %s no backup completo.", logo_file.name)
+                            falhas.append((f"logos/{logo_file.name}", str(exc)))
 
-            # â”€â”€ 3. BANCOS TENANT + CSVs por igreja â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            # ─── 3. BANCOS TENANT + CSVs por igreja ────────────────────────
             for _, row in df_igrejas.iterrows():
                 slug = str(row["slug"])
 
@@ -494,8 +497,9 @@ def _backup_admin():
                         f"{slug}/cadastros.csv",
                         df_c.to_csv(index=False, encoding="utf-8-sig"),
                     )
-                except Exception:
-                    logging.exception("Erro ignorado silenciosamente")
+                except Exception as exc:
+                    logging.exception("Falha ao exportar cadastros da igreja %s no backup completo.", slug)
+                    falhas.append((f"{slug}/cadastros.csv", str(exc)))
 
                 try:
                     df_l = carregar_lancamentos(slug)
@@ -510,22 +514,39 @@ def _backup_admin():
                         f"{slug}/lancamentos.csv",
                         df_l.to_csv(index=False, encoding="utf-8-sig"),
                     )
-                except Exception:
-                    logging.exception("Erro ignorado silenciosamente")
+                except Exception as exc:
+                    logging.exception("Falha ao exportar lancamentos da igreja %s no backup completo.", slug)
+                    falhas.append((f"{slug}/lancamentos.csv", str(exc)))
 
                 try:
                     db = _tenant_db(slug)
                     if db.exists():
                         zf.writestr(f"{slug}/banco_{slug}.db", db.read_bytes())
-                except Exception:
-                    logging.exception("Erro ignorado silenciosamente")
+                except Exception as exc:
+                    logging.exception("Falha ao incluir o banco da igreja %s no backup completo.", slug)
+                    falhas.append((f"{slug}/banco_{slug}.db", str(exc)))
 
         buf.seek(0)
         st.session_state["backup_admin_dados"] = buf.read()
         st.session_state["backup_admin_nome"] = (
             f"fielmordomo_backup_completo_{_pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.zip"
         )
-        st.toast("Backup completo gerado!")
+        st.session_state["backup_admin_falhas"] = falhas
+        if falhas:
+            st.warning(
+                f"⚠️ Backup gerado, mas {len(falhas)} item(ns) falharam e podem "
+                "estar ausentes do ZIP. Veja a lista abaixo."
+            )
+        else:
+            st.toast("Backup completo gerado!")
+
+    if st.session_state.get("backup_admin_falhas"):
+        with st.expander(
+            f"⚠️ {len(st.session_state['backup_admin_falhas'])} falha(s) no ultimo backup completo",
+            expanded=False,
+        ):
+            for item, erro in st.session_state["backup_admin_falhas"]:
+                st.caption(f"• **{item}**: {erro}")
 
     if "backup_admin_dados" in st.session_state:
         tam_mb = len(st.session_state["backup_admin_dados"]) / (1024 * 1024)

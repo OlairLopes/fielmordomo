@@ -183,12 +183,9 @@ def _montar_mensagem_aniversario(nome, idade, nome_igreja, sexo=""):
     tratamento = _tratamento_por_sexo(sexo)
     ano_str = "anos" if idade != 1 else "ano"
 
-    # Busca o identificador/slug somente para usar na mensagem do aniversariante
-    identificador = slug_da_sessao()
-
     return (
         f"A paz do Senhor, {tratamento} {nome}! \n\n"
-        f"Neste dia especial, a família {identificador} se alegra por sua vida "
+        f"Neste dia especial, a família {nome_igreja} se alegra por sua vida "
         f"e deseja a você um feliz aniversário.\n\n"
         f"Nossa oração é que Deus continue conduzindo seus passos, "
         f"fortalecendo sua fé e concedendo saúde, paz e alegria.\n\n"
@@ -525,7 +522,7 @@ def _aniversariantes_hoje(df_aniv):
 
 
 # ─────────────────────────────────────────────────────────────
-# ENVIO AUTOM�?TICO
+# ENVIO AUTOMÁTICO
 # ─────────────────────────────────────────────────────────────
 
 def _executar_envio_aniversariantes_hoje(df_hoje, nome_igreja, slug, forcar=False):
@@ -668,7 +665,7 @@ def _card_aniv(nome, data_str, idade, telefone, nome_igreja, sexo="", classe="")
 
 
 # ─────────────────────────────────────────────────────────────
-# CALEND�?RIO
+# CALENDÁRIO
 # ─────────────────────────────────────────────────────────────
 
 def _renderizar_calendario(df_aniv, ano, mes):
@@ -927,7 +924,7 @@ def render():
                 "text/csv",
             )
 
-    # ── ABA: CALEND�?RIO ──────────────────────────────────────────────────
+    # ── ABA: CALENDÁRIO ──────────────────────────────────────────────────
     with aba_cal:
         c1, c2 = st.columns(2)
 
@@ -1013,7 +1010,7 @@ def render():
 
             with col2:
                 reenviar_forcado = st.button(
-                    "�? Reenviar mesmo se já enviado",
+                    "🔄 Reenviar mesmo se já enviado",
                     use_container_width=True,
                     disabled=not _whatsapp_api_configurada(),
                 )
