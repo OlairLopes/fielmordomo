@@ -18,11 +18,11 @@ import math
 import os
 import re
 import json
+import secrets
 import sqlite3
 import urllib.parse
 import urllib.request
 import urllib.error
-import uuid
 
 import pandas as pd
 import streamlit as st
@@ -255,6 +255,11 @@ def _time_to_str(t):
 
 # ─── Fuso horario do Brasil (UTC-3) ─────────────────────────────────────
 TZ_BRASILIA = datetime.timezone(datetime.timedelta(hours=-3))
+
+# Validade absoluta do token de auto-checkin, independente da janela do
+# evento (defesa extra para eventos sem horario definido ou links antigos
+# reencaminhados).
+TOKEN_CHECKIN_VALIDADE_HORAS = 48
 
 
 def _agora_brasil():
@@ -490,8 +495,8 @@ def _gerar_tokens_checkin(slug, id_evento, ids_membros):
                 if row:
                     tokens[int(id_cadastro)] = row[0]
                 else:
-                    # Gera novo token (12 chars hex)
-                    novo_token = uuid.uuid4().hex[:12]
+                    # Gera novo token (32 chars hex, 128 bits de entropia)
+                    novo_token = secrets.token_hex(16)
                     conn.execute(
                         """INSERT INTO geo_checkin_tokens
                            (token, id_evento, id_cadastro, criado_em)
@@ -2338,6 +2343,10 @@ def _render_auto_checkin_via_link(slug, token):
     dados_token = _ler_token_checkin(slug, token)
 
     if not dados_token:
+        logging.warning(
+            "Tentativa de auto-checkin com token invalido (slug=%s, token=%s...).",
+            slug, str(token)[:8],
+        )
         st.error(
             "❌ **Link invalido ou expirado.**\n\n"
             "Verifique se o link recebido esta completo. "
@@ -2351,6 +2360,26 @@ def _render_auto_checkin_via_link(slug, token):
             f"ℹ️ **Este link ja foi utilizado.**\n\n"
             f"Sua presenca ja foi registrada em: {dados_token['usado_em']}\n\n"
             f"Resultado: {dados_token.get('resultado', 'presenca registrada')}"
+        )
+        return
+
+    # Expiracao absoluta do token, independente da janela do evento.
+    try:
+        criado_em_dt = datetime.datetime.fromisoformat(dados_token["criado_em"])
+    except (TypeError, ValueError):
+        criado_em_dt = None
+
+    if criado_em_dt is not None and _agora_brasil() - criado_em_dt > datetime.timedelta(
+        hours=TOKEN_CHECKIN_VALIDADE_HORAS
+    ):
+        logging.warning(
+            "Tentativa de auto-checkin com token expirado (slug=%s, evento=%s).",
+            slug, dados_token["id_evento"],
+        )
+        st.error(
+            f"⏰ **Este link expirou.**\n\n"
+            f"Links de check-in sao validos por ate {TOKEN_CHECKIN_VALIDADE_HORAS} horas "
+            "apos o envio. Solicite um novo link a lideranca."
         )
         return
 
