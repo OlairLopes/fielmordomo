@@ -46,7 +46,7 @@ from data.repository import (
     listar_geo_presencas,
     _tenant_db,
 )
-from utils.helpers import gerar_csv, slug_da_sessao
+from utils.helpers import gerar_csv, slug_da_sessao, solicitar_autorizacao
 
 
 # ─── Constantes ────────────────────────────────────────────────────────
@@ -1741,36 +1741,47 @@ def _render_checkin(slug):
                     st.error(f"❌ Erro ao registrar: {exc}")
 
         with st.expander("🛠️ Registrar localizacao manualmente"):
-            st.caption("Use somente se a captura automatica nao funcionar.")
-            cm1, cm2 = st.columns(2)
-            lat_m = cm1.number_input("Latitude", value=0.0, format="%.8f", key="manual_lat")
-            lon_m = cm2.number_input("Longitude", value=0.0, format="%.8f", key="manual_lon")
+            st.caption(
+                "Use somente se a captura automatica nao funcionar. Como esta opcao "
+                "ignora a verificacao por GPS, e necessario confirmar a senha da "
+                "igreja antes de registrar."
+            )
 
-            if st.button(
-                "Registrar manualmente",
-                key=f"btn_reg_manual_{evento['id_evento']}_{membro['id_cadastro']}",
-            ):
-                if lat_m == 0 and lon_m == 0:
-                    st.error("Informe coordenadas validas.")
-                else:
-                    dist_m, dentro_m, presente_m, status_m, _, _ = _calcular_resultado_presenca(
-                        evento, lat_m, lon_m, config_temporal
-                    )
-                    try:
-                        registrar_geo_presenca(
-                            slug=slug,
-                            id_evento=evento["id_evento"],
-                            id_cadastro=membro["id_cadastro"],
-                            latitude=lat_m,
-                            longitude=lon_m,
-                            distancia_m=dist_m,
-                            dentro_raio=dentro_m,
-                            presente=presente_m,
-                            status=status_m,
+            autorizado_manual = solicitar_autorizacao(
+                f"geo_manual_{evento['id_evento']}",
+                "registrar localizacao manualmente",
+            )
+
+            if autorizado_manual:
+                cm1, cm2 = st.columns(2)
+                lat_m = cm1.number_input("Latitude", value=0.0, format="%.8f", key="manual_lat")
+                lon_m = cm2.number_input("Longitude", value=0.0, format="%.8f", key="manual_lon")
+
+                if st.button(
+                    "Registrar manualmente",
+                    key=f"btn_reg_manual_{evento['id_evento']}_{membro['id_cadastro']}",
+                ):
+                    if lat_m == 0 and lon_m == 0:
+                        st.error("Informe coordenadas validas.")
+                    else:
+                        dist_m, dentro_m, presente_m, status_m, _, _ = _calcular_resultado_presenca(
+                            evento, lat_m, lon_m, config_temporal
                         )
-                        st.success("Registro salvo.")
-                    except Exception as exc:
-                        st.error(f"Erro: {exc}")
+                        try:
+                            registrar_geo_presenca(
+                                slug=slug,
+                                id_evento=evento["id_evento"],
+                                id_cadastro=membro["id_cadastro"],
+                                latitude=lat_m,
+                                longitude=lon_m,
+                                distancia_m=dist_m,
+                                dentro_raio=dentro_m,
+                                presente=presente_m,
+                                status=status_m,
+                            )
+                            st.success("Registro salvo.")
+                        except Exception as exc:
+                            st.error(f"Erro: {exc}")
 
     # ─── EM MASSA ───────────────────────────────────────────────────
     with tab_massa:
