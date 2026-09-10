@@ -2,6 +2,7 @@
 import datetime
 import html
 import sqlite3
+import unicodedata
 
 import streamlit as st
 import pandas as pd
@@ -110,6 +111,12 @@ def _formatar_tel(tel):
     if len(digits) == 10:
         return f"({digits[:2]}) {digits[2:6]}-{digits[6:]}"
     return tel
+
+
+def _normalizar_texto_busca(texto):
+    """Minusculo e sem acentos, para comparacao tolerante a acentuacao."""
+    texto = unicodedata.normalize("NFKD", str(texto or ""))
+    return "".join(c for c in texto if not unicodedata.combining(c)).strip().casefold()
 
 
 def _formatar_data(data_str):
@@ -1360,6 +1367,55 @@ def _painel_cadastros(slug, df, plano, p_info, congregacao_fixa, bloqueado, limi
             registro_atual = linhas.iloc[0]
 
     st.markdown("### 🗂️ Ficha de cadastro")
+
+    termo_busca = st.text_input(
+        "🔎 Consultar membro ou fornecedor",
+        key=f"cadf_busca_{slug}",
+        placeholder="Digite nome, CPF/CNPJ ou telefone...",
+    )
+    termo_busca = termo_busca.strip()
+    if termo_busca and not df_ficha.empty:
+        termo_nome = _normalizar_texto_busca(termo_busca)
+        termo_digitos = "".join(c for c in termo_busca if c.isdigit())
+
+        def _bate_busca(row):
+            if termo_nome and termo_nome in _normalizar_texto_busca(row.get("nome", "")):
+                return True
+            if termo_digitos:
+                doc_digitos = "".join(c for c in str(row.get("cpf", "")) if c.isdigit())
+                tel_digitos = "".join(c for c in str(row.get("telefone", "")) if c.isdigit())
+                if doc_digitos and termo_digitos in doc_digitos:
+                    return True
+                if tel_digitos and termo_digitos in tel_digitos:
+                    return True
+            return False
+
+        encontrados = df_ficha[df_ficha.apply(_bate_busca, axis=1)]
+
+        if encontrados.empty:
+            st.caption("Nenhum cadastro encontrado para essa busca.")
+        else:
+            opcoes_busca = {}
+            for _, row in encontrados.iterrows():
+                tipo_row = str(row.get("tipo_cadastro", "")).strip()
+                doc_row = _formatar_doc(str(row.get("cpf", "")), tipo_row)
+                rotulo = f'{row["nome"]} — {tipo_row}'
+                if doc_row.strip():
+                    rotulo += f' — {doc_row}'
+                opcoes_busca[rotulo] = int(row["id_cadastro"])
+
+            placeholder_busca = "Selecione um resultado"
+            rotulo_escolhido = st.selectbox(
+                f"Resultados ({len(opcoes_busca)})",
+                [placeholder_busca] + list(opcoes_busca.keys()),
+                key=f"cadf_busca_sel_{slug}",
+            )
+            if rotulo_escolhido != placeholder_busca:
+                id_escolhido = opcoes_busca[rotulo_escolhido]
+                if id_escolhido in ids_ficha and ids_ficha[idx] != id_escolhido:
+                    st.session_state[sk_idx] = ids_ficha.index(id_escolhido)
+                    st.session_state[sk_modo] = "navegar"
+                    st.rerun()
 
     with st.container(key=f"cad_toolbar_{slug}", horizontal=True, gap="small"):
         if st.button("", key=f"cadt_novo_{slug}", icon=":material/add:", help="Novo cadastro"):
