@@ -1528,12 +1528,14 @@ def modal_excluir_lancamento(slug, sel):
 
     if cancelar:
         st.session_state.pop(f"mexc_lanc_conf_{id_lanc}", None)
+        st.session_state.pop(_sk("del_lanc_pendente", slug), None)
         st.rerun()
 
     if excluir_btn:
         try:
             excluir_lancamento(slug, id_lanc)
             _invalida()
+            st.session_state.pop(_sk("del_lanc_pendente", slug), None)
             for k in list(st.session_state.keys()):
                 if (k.startswith("mexc_lanc_")
                     or k.startswith("_auth_")
@@ -1975,7 +1977,20 @@ def render():
                 use_container_width=True,
                 key="btn_abrir_del_lanc",
             ):
-                modal_excluir_lancamento(slug, sel)
+                st.session_state[_sk("del_lanc_pendente", slug)] = int(sel["id_lancamento"])
+
+        id_pendente = st.session_state.get(_sk("del_lanc_pendente", slug))
+        if id_pendente:
+            sel_pendente = df_e[df_e["id_lancamento"] == id_pendente]
+            if sel_pendente.empty:
+                st.session_state.pop(_sk("del_lanc_pendente", slug), None)
+            else:
+                st.caption(
+                    "Excluir um lancamento e uma acao irreversivel. Confirme "
+                    "a senha da igreja antes de continuar."
+                )
+                if solicitar_autorizacao("excluir_lancamento", "excluir um lancamento"):
+                    modal_excluir_lancamento(slug, sel_pendente.iloc[0])
 
     # ─── Fechamento de caixa (mantido como expander) ───────────────
     with st.expander("📊 2a via do cupom / fechamento de caixa", expanded=False):
